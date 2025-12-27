@@ -1,0 +1,88 @@
+.movie-home {
+  background: #141436;
+  min-height: 100vh;
+  color: #fff;
+}
+
+.hero-swiper {
+  height: 80vh;
+}
+
+.hero-slide {
+  position: relative;
+  height: 80vh;
+  overflow: hidden;
+}
+
+.hero-slide-img {
+  width: 100%;
+  object-fit: cover; 
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 80px;
+  left: 60px;
+  color: #fff;
+  max-width: 500px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.hero-genre {
+  font-size: 1.1rem;
+}
+
+/* SECTIONS */
+.slider-section {
+  padding: 40px 24px;
+}
+
+.section-title {
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  border-left: 5px solid #ff3d00;
+  padding-left: 14px;
+}
+
+.loading-text {
+  color: #fff;
+  padding: 40px;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #ff3d00;
+}
+
+@media (max-width: 900px) {
+  .hero-overlay {
+    bottom: 40px;
+    left: 20px;
+    max-width: 90%;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-genre {
+    font-size: 0.95rem;
+  }
+
+  .slider-section {
+    padding: 20px 12px;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    padding-left: 10px;
+  }
+}

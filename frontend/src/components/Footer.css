@@ -1,0 +1,37 @@
+.footer {
+  position: relative;       
+  width: 100%;
+  padding: 16px 24px;
+  background-color: #010122;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  border-top: 1px solid #333;
+  text-align: center;
+}
+
+.footer p {
+  margin: 4px 0;
+}
+
+.footer a {
+  color: #ff3d00;
+  text-decoration: none;
+  margin: 0 6px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+}
