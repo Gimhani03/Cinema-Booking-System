@@ -110,7 +110,7 @@ const Topbar = () => {
       <NavLink to="/admin/users" onClick={() => setMobileOpen(false)}>
         <MdPeople /> Users
       </NavLink>
-      <NavLink to="/showtimes" onClick={() => setMobileOpen(false)}>
+      <NavLink to="/admin/showtimes" onClick={() => setMobileOpen(false)}>
         <MdSchedule /> Showtimes
       </NavLink>
       <NavLink to="/halls" onClick={() => setMobileOpen(false)}>

@@ -1,0 +1,217 @@
+.selection-page {
+  background-color: #0b0f19; 
+  min-height: 100vh;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  padding-bottom: 50px;
+}
+
+.selection-header-banner {
+  background-size: cover;
+  background-position: center;
+  padding: 25px 5% 25px;
+  border-bottom: 1px solid #2c2c54;
+}
+
+.header-container {
+  display: flex;
+  align-items: flex-end; 
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-poster-wrapper {
+  flex-shrink: 0;
+}
+
+.header-poster {
+  width: 120px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px; 
+  box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-content h1 {
+  margin: 0 0 10px 0;
+  color: #fff;
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  line-height: 1;
+}
+
+.meta-tags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.tag {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    border-radius: 20px;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+}
+
+.tag.rating {
+    background-color: rgba(255, 61, 0, 0.2);
+    color: #ff3d00;
+}
+
+.genres {
+  color: #c0c0ff;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.date-bar-container {
+    background-color: #101420;
+    border-bottom: 1px solid #2c2c54;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+    position: relative;
+    z-index: 10;
+}
+
+.date-bar {
+  display: flex;
+  gap: 15px;
+  padding: 15px 5%; 
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: auto;
+}
+
+.date-card {
+  background: transparent;
+  border: 1px solid #2c2c54;
+  border-radius: 8px;
+  min-width: 70px; 
+  padding: 10px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  color: #aaa;
+  transition: all 0.3s ease;
+}
+
+.date-card:hover {
+  background-color: #1f2533;
+  border-color: #444;
+}
+
+.date-card.active {
+  background-color: #d32f2f;
+  color: white;
+  border-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4);
+}
+
+.date-month { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;}
+.date-num { font-size: 1.6rem; font-weight: bold; margin: 3px 0; line-height: 1;}
+.date-day { font-size: 0.85rem; opacity: 0.8;}
+
+
+.times-container {
+  padding: 30px 5%; 
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hall-group {
+  margin-bottom: 30px;
+  background-color: #131722;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #252540;
+}
+
+.hall-title {
+  color: #fff;
+  border-left: 4px solid #d32f2f;
+  padding-left: 10px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  margin-top: 0;
+}
+
+.time-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.time-btn {
+  background: linear-gradient(145deg, #1a1f2e, #131722);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px 20px;
+  min-width: 100px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.time-btn:hover {
+  background: #d32f2f;
+  border-color: #d32f2f;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+}
+
+.time-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.price-text {
+  font-size: 0.8rem;
+  margin-top: 4px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.no-showtimes-msg {
+  text-align: center;
+  color: #777;
+  padding: 60px;
+  background: #101420;
+  border-radius: 12px;
+}
+
+.no-showtimes-msg h3 { color: #aaa; margin-bottom: 10px; font-size: 1.5rem;}
+
+
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: row; 
+        align-items: center;
+        text-align: left;
+    }
+
+    .header-poster {
+        width: 80px; 
+        height: 120px;
+    }
+
+    .header-content h1 {
+        font-size: 1.6rem;
+    }
+    
+    .selection-header-banner {
+        padding: 20px 5%;
+    }
+}

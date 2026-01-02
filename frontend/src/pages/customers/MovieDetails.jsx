@@ -28,7 +28,7 @@ const MovieDetails = () => {
   if (loading) return <p>Loading movie...</p>;
   if (!movie) return <p>Movie not found</p>;
 
-  const handleBooking = () => navigate(`/booking/${movie._id}`);
+  const handleBooking = () => navigate(`/buy-tickets/${movie._id}`);
   const toggleTrailer = () => setShowTrailer(prev => !prev);
 
   const getEmbedUrl = (url) => {
