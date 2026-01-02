@@ -18,6 +18,10 @@ import ResetPassword from "./pages/customers/ResetPassword";
 import ConfirmPassword from "./pages/customers/ConfirmPassword";
 import UsersList from "./pages/admin/UsersList";
 import { SearchProvider } from "./context/SearchContext";
+import ShowtimeManager from "./pages/admin/ShowtimeManager";
+import AddShowtimeForm from "./pages/admin/AddShowtimeForm";
+import EditShowtimeForm from "./pages/admin/EditShowtimeForm";
+import ShowtimeSelection from "./pages/customers/ShowtimeSelection";
 
 function App() {
   const role = localStorage.getItem("role"); 
@@ -137,6 +141,47 @@ function App() {
               </PageLayout>
             }
           />
+
+          <Route
+            path="/admin/showtimes"
+            element={
+              <ProtectedRoute roleRequired="admin">
+                <PageLayout isAdmin={true}>
+                  <ShowtimeManager />
+                </PageLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/showtimes/add"
+            element={
+              <ProtectedRoute roleRequired="admin">
+                <PageLayout isAdmin={true}>
+                  <AddShowtimeForm />
+                </PageLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/showtimes/edit/:id"
+            element={
+              <ProtectedRoute roleRequired="admin">
+                <PageLayout isAdmin={true}>
+                  <EditShowtimeForm />
+                </PageLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/buy-tickets/:movieId" 
+            element={
+              <PageLayout>
+              <ShowtimeSelection />
+              </PageLayout>
+            } 
+          />
+          
+          
         </Routes>
       </Router>
     </SearchProvider>
