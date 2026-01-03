@@ -26,7 +26,7 @@ const MovieCard = ({ movie }) => {
 
           <button
             className="btn secondary"
-            onClick={() => navigate(`/booking/${movie._id}`)}
+            onClick={() => navigate(`/buy-tickets/${movie._id}`)}
           >
             Book Now
           </button>
