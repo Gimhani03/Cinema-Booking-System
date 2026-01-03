@@ -87,7 +87,7 @@ const ShowtimeManager = () => {
               showtimes.map((st) => (
                 <tr key={st._id}>
                   <td>{st.movie?.title || "Unknown Movie"}</td>
-                  <td>{st.hall?.name || "Unknown Hall"}</td>
+                  <td>{st.hall || "Unknown Hall"}</td>
                   <td>{new Date(st.date).toLocaleDateString()}</td>
                   <td>{st.startTime}</td>
                   <td>Rs. {st.price}</td>
