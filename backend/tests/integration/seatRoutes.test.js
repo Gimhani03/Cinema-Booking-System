@@ -1,38 +1,58 @@
 const request = require('supertest');
 const express = require('express');
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const seatRoutes = require('../../routes/seats');
+const Seat = require('../../models/Seat');
 
-// --- FIX START: Mock Mongoose Connection ---
-// This tells the test: "Pretend we connected to the DB, don't actually try."
-jest.mock('mongoose', () => {
-  const originalMongoose = jest.requireActual('mongoose');
-  return {
-    ...originalMongoose, 
-    connect: jest.fn().mockResolvedValue(), // Fake the connection success
-    disconnect: jest.fn().mockResolvedValue(),
-  };
-});
-// --- FIX END ---
-
-const seatRoutes = require('../../routes/seats'); 
-
+// --- SETUP CUSTOM APP ---
 const app = express();
 app.use(express.json());
-app.use('/api/seats', seatRoutes);
+// Mount routes at root. 
+// So the path becomes: /:showtimeId
+app.use('/', seatRoutes); 
 
-// Mock Database Data (The Seat Model)
-jest.mock('../../models/Seat', () => ({
-  find: jest.fn().mockResolvedValue([{ row: 'A', number: 1, status: 'available' }]),
-  deleteMany: jest.fn().mockResolvedValue({ deletedCount: 200 }),
-  insertMany: jest.fn().mockResolvedValue({ insertedCount: 200 }),
-}));
+let mongoServer;
 
+// --- DATABASE SETUP ---
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  await mongoose.disconnect();
+  await mongoose.connect(uri);
+});
+
+afterEach(async () => {
+  await Seat.deleteMany();
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// --- THE TEST ---
 describe('Seat Routes API', () => {
-  
-  test('GET /api/seats - Should return list of seats', async () => {
-    const res = await request(app).get('/api/seats');
+  test('GET /:showtimeId - Should return list of seats', async () => {
+    // 1. Generate a Fake Showtime ID
+    const fakeId = new mongoose.Types.ObjectId();
+
+    // 2. Create a seat LINKED to that ID
+    await Seat.create({ 
+      row: 'A', 
+      number: 1, 
+      price: 1000, 
+      status: 'available', 
+      showtimeId: fakeId // Link it here
+    });
+    
+    // 3. THE FIX: Add the ID to the URL!
+    // Instead of get('/'), we use get('/' + fakeId)
+    const res = await request(app).get('/' + fakeId); 
+
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(1);
+    expect(res.body[0].showtimeId).toBe(fakeId.toString());
   });
-
 });
