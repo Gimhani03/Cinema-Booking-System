@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getMovieById } from "../../services/movieService";
 import { getShowtimesByMovie } from "../../services/showtimeService";
+import { getHalls } from "../../services/hallService"; // <--- Import Hall Service
 import "./ShowtimeSelection.css";
 
 const ShowtimeSelection = () => {
@@ -10,6 +11,7 @@ const ShowtimeSelection = () => {
 
   const [movie, setMovie] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
+  const [halls, setHalls] = useState([]); // <--- State to store Halls lookup
   const [loading, setLoading] = useState(true);
   
   const [selectedDate, setSelectedDate] = useState("");
@@ -17,13 +19,20 @@ const ShowtimeSelection = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // 1. Fetch Movie Details
         const movieData = await getMovieById(movieId);
         setMovie(movieData);
 
+        // 2. Fetch Showtimes
         const showtimeData = await getShowtimesByMovie(movieId);
         const allShowtimes = showtimeData.data || [];
         setShowtimes(allShowtimes);
 
+        // 3. Fetch Halls (To lookup names if backend sends IDs)
+        const hallData = await getHalls();
+        setHalls(hallData.data || []);
+
+        // 4. Set Default Date
         if (allShowtimes.length > 0) {
             const dates = [...new Set(allShowtimes.map(st => new Date(st.date).toDateString()))];
             dates.sort((a, b) => new Date(a) - new Date(b));
@@ -48,13 +57,25 @@ const ShowtimeSelection = () => {
     st => new Date(st.date).toDateString() === selectedDate
   );
 
+  // --- ROBUST GROUPING LOGIC ---
   const showtimesByHall = showtimesForDate.reduce((acc, st) => {
-    // If hall name isn't populated, fallback to "Main Hall" or ID
-    const hallName = st.hall?.name || "Cinema Hall"; 
+    let hallName = "Unknown Hall";
+
+    // Case A: Hall is populated (Object with name)
+    if (st.hall && st.hall.name) {
+        hallName = st.hall.name;
+    } 
+    // Case B: Hall is just an ID (String) -> Lookup in 'halls' array
+    else if (st.hall) {
+        const foundHall = halls.find(h => h._id === st.hall);
+        if (foundHall) hallName = foundHall.name;
+    }
+
     if (!acc[hallName]) acc[hallName] = [];
     acc[hallName].push(st);
     return acc;
   }, {});
+  // -----------------------------
 
   const handleTimeClick = (showtimeId) => {
     navigate(`/booking/${showtimeId}`);
@@ -62,6 +83,7 @@ const ShowtimeSelection = () => {
 
   return (
     <div className="selection-page">
+      {/* HEADER - UNCHANGED */}
       <div 
         className="selection-header-banner"
         style={{ backgroundImage: `linear-gradient(to right, rgba(11, 15, 25, 0.95), rgba(11, 15, 25, 0.8)), url(${movie.posterUrl})` }}
@@ -87,7 +109,8 @@ const ShowtimeSelection = () => {
           </div>
         </div>
       </div>
- 
+
+      {/* DATE BAR - UNCHANGED */}
       <div className="date-bar-container">
         <div className="date-bar">
             {uniqueDates.length === 0 ? (
@@ -116,6 +139,7 @@ const ShowtimeSelection = () => {
         </div>
       </div>
 
+      {/* --- HALL & TIMES SECTION (SCOPE LAYOUT) --- */}
       <div className="times-container">
         {Object.keys(showtimesByHall).length === 0 ? (
             <div className="no-showtimes-msg">
@@ -124,20 +148,30 @@ const ShowtimeSelection = () => {
             </div>
         ) : (
             Object.keys(showtimesByHall).map((hallName) => (
-                <div key={hallName} className="hall-group">
-                    <h3 className="hall-title">{hallName}</h3>
-                    <div className="time-grid">
-                        {showtimesByHall[hallName].map((st) => (
-                            <button 
-                                key={st._id} 
-                                className="time-btn"
-                                onClick={() => handleTimeClick(st._id)}
-                            >
-                                <span className="time-text">{st.startTime}</span>
-                                <span className="price-text">Rs. {st.price}</span>
-                            </button>
-                        ))}
+                <div key={hallName} className="scope-hall-row">
+                    
+                    {/* LEFT COL: Hall Name */}
+                    <div className="hall-left-col">
+                        <h2 className="scope-hall-name">{hallName}</h2>
+                        <span className="scope-subtitle">Digital Experience</span>
                     </div>
+
+                    {/* RIGHT COL: Buttons */}
+                    <div className="hall-right-col">
+                        <div className="time-grid">
+                            {showtimesByHall[hallName].map((st) => (
+                                <button 
+                                    key={st._id} 
+                                    className="scope-time-btn"
+                                    onClick={() => handleTimeClick(st._id)}
+                                >
+                                    <span className="time-text">{st.startTime}</span>
+                                    <span className="price-text">Rs. {st.price}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                 </div>
             ))
         )}
