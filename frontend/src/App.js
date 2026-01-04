@@ -22,6 +22,7 @@ import ShowtimeManager from "./pages/admin/ShowtimeManager";
 import AddShowtimeForm from "./pages/admin/AddShowtimeForm";
 import EditShowtimeForm from "./pages/admin/EditShowtimeForm";
 import ShowtimeSelection from "./pages/customers/ShowtimeSelection";
+import HallManager from './pages/admin/HallManager';
 
 function App() {
   const role = localStorage.getItem("role"); 
@@ -180,7 +181,11 @@ function App() {
               </PageLayout>
             } 
           />
-          
+          <Route path="/admin/halls"
+           element={
+           <HallManager />
+           } 
+           />
           
         </Routes>
       </Router>
