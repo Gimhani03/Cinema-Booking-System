@@ -28,8 +28,4 @@ jobs:
 
       - name: Run unit and integration tests
         working-directory: backend
-        env:
-          MONGODB_URI: mongodb://localhost:27017/cinema-test
-          MONGO_URI:  mongodb://localhost:27017/cinema-test
-          MONGO_URI_TEST: mongodb://localhost:27017/cinema-test
         run: npm test
