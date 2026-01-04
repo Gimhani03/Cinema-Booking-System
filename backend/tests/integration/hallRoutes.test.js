@@ -1,25 +1,20 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const path = require('path');
-
-// Load .env from root
-require('dotenv').config({ path: path.join(process.cwd(), '.env') });
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const app = require('../../app'); 
 const Hall = require('../../models/Hall');
 
-jest.setTimeout(60000); 
+jest.setTimeout(60000);
+
+let mongoServer;
 
 beforeAll(async () => {
-    // --- FIX: Added 'MONGODB_URI' to the check list ---
-    const mongoUri = process.env.MONGO_URI_TEST || process.env.MONGO_URI || process.env.MONGODB_URI;
+    // Start MongoDB Memory Server
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
     
-    if (!mongoUri) {
-        console.error("❌ ERROR: Database URI is undefined.");
-        console.error("   Available keys:", Object.keys(process.env));
-        throw new Error("Terminating test: No Database URI found.");
-    }
-
+    // Connect to the in-memory database
     if (mongoose.connection.readyState === 0) {
         await mongoose.connect(mongoUri);
     }
@@ -32,8 +27,13 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+    // Close mongoose connection
     if (mongoose.connection.readyState === 1) {
-        await mongoose.connection.close();
+        await mongoose.connection. close();
+    }
+    // Stop MongoDB Memory Server
+    if (mongoServer) {
+        await mongoServer.stop();
     }
 });
 
@@ -64,7 +64,7 @@ describe('Hall API Integration Tests', () => {
 
         expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body.data)).toBe(true);
-        expect(res.body.data.length).toBeGreaterThanOrEqual(1);
+        expect(res.body. data.length).toBeGreaterThanOrEqual(1);
     });
 
     it('PUT /api/halls/:id - should update hall details', async () => {
@@ -90,7 +90,7 @@ describe('Hall API Integration Tests', () => {
         const res = await request(app).delete(`/api/halls/${hall._id}`);
 
         expect(res.statusCode).toBe(200);
-        
+
         const check = await Hall.findById(hall._id);
         expect(check).toBeNull();
     });
