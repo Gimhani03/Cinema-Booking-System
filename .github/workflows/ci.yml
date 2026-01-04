@@ -28,4 +28,6 @@ jobs:
 
       - name: Run unit and integration tests
         working-directory: backend
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: npm test
