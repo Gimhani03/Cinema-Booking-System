@@ -5,6 +5,7 @@ const authRoutes = require("./routes/auth");
 const passwordRoutes = require("./routes/password");
 const showtimeRoutes = require('./routes/showtimeRoutes');
 const hallRoutes = require('./routes/hallRoutes');
+const seatRoutes = require('./routes/seats');
 
 const app = express();
 
@@ -16,5 +17,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/password", passwordRoutes);
 app.use('/api/showtimes', showtimeRoutes);
 app.use('/api/halls', hallRoutes);
+app.use('/api/seats', seatRoutes);
 
 module.exports = app;

@@ -23,6 +23,7 @@ import AddShowtimeForm from "./pages/admin/AddShowtimeForm";
 import EditShowtimeForm from "./pages/admin/EditShowtimeForm";
 import ShowtimeSelection from "./pages/customers/ShowtimeSelection";
 import HallManager from './pages/admin/HallManager';
+import SeatSelection from './SeatSelection';
 
 function App() {
   const role = localStorage.getItem("role"); 
@@ -122,6 +123,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/confirm-password" element={<ConfirmPassword />} />
+          <Route path="/seats" element={<SeatSelection />} />
           
           <Route
             path="/profile"
