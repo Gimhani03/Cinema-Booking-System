@@ -124,6 +124,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/confirm-password" element={<ConfirmPassword />} />
           <Route path="/seats" element={<SeatSelection />} />
+          <Route path="/booking/:showtimeId" element={<SeatSelection />} />
           
           <Route
             path="/profile"

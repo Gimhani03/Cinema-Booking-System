@@ -160,3 +160,47 @@ body {
     cursor: pointer;
 }
 .btn-pay:hover { filter: brightness(1.1); }
+/* -- COPY THIS INTO SeatMap.css -- */
+
+/* Makes the seat Yellow when clicked */
+.seat.selected {
+    background-color: #facc15 !important; /* Yellow */
+    color: black;
+    border: 2px solid orange;
+}
+
+/* Makes booked seats Red */
+.seat.booked {
+    background-color: #ef4444 !important; /* Red */
+    cursor: not-allowed;
+    pointer-events: none; /* Prevents clicking */
+}
+
+/* Makes available seats White */
+.seat.available {
+    background-color: white;
+    cursor: pointer;
+}
+
+/* The footer bar that appears when you select seats */
+.summary-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #222;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 3px solid #facc15;
+}
+/* Add this class for the invisible gaps */
+.seat.gap {
+    background-color: transparent !important;
+    border: none !important;
+    cursor: default;
+    pointer-events: none; /* Cannot click a gap */
+    visibility: hidden; /* Makes it invisible but keeps the space */
+}
