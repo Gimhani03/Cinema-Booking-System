@@ -4,17 +4,15 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const seatRoutes = require('../../routes/seats');
 const Seat = require('../../models/Seat');
+const Hall = require('../../models/Hall');         // We need this now!
+const Showtime = require('../../models/Showtime'); // We need this now!
 
-// --- SETUP CUSTOM APP ---
 const app = express();
 app.use(express.json());
-// Mount routes at root. 
-// So the path becomes: /:showtimeId
-app.use('/', seatRoutes); 
+app.use('/', seatRoutes);
 
 let mongoServer;
 
-// --- DATABASE SETUP ---
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
@@ -24,6 +22,8 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await Seat.deleteMany();
+  await Hall.deleteMany();
+  await Showtime.deleteMany();
 });
 
 afterAll(async () => {
@@ -31,28 +31,48 @@ afterAll(async () => {
   await mongoServer.stop();
 });
 
-// --- THE TEST ---
-describe('Seat Routes API', () => {
-  test('GET /:showtimeId - Should return list of seats', async () => {
-    // 1. Generate a Fake Showtime ID
-    const fakeId = new mongoose.Types.ObjectId();
+describe('Smart Seat Generation API', () => {
 
-    // 2. Create a seat LINKED to that ID
-    await Seat.create({ 
-      row: 'A', 
-      number: 1, 
-      price: 1000, 
-      status: 'available', 
-      showtimeId: fakeId // Link it here
+  test('POST /generate - Should generate seats based on Hall Layout', async () => {
+    // 1. Create a HALL with a specific layout (1 = Seat, 0 = Aisle)
+    // Layout: [Seat, Aisle, Seat] (Row A)
+    const hall = await Hall.create({
+      name: "IMAX Test Hall",
+      totalRows: 1,
+      totalCols: 3,
+      seatCapacity: 2,
+      seatLayout: [[1, 0, 1]] // <-- The secret map!
     });
-    
-    // 3. THE FIX: Add the ID to the URL!
-    // Instead of get('/'), we use get('/' + fakeId)
-    const res = await request(app).get('/' + fakeId); 
 
+    // 2. Create a SHOWTIME linked to that Hall
+    const showtime = await Showtime.create({
+      movie: new mongoose.Types.ObjectId(), // Fake Movie ID
+      hall: hall._id,                       // Link to our Hall
+      date: new Date(),
+      startTime: "10:00",
+      price: 1500
+    });
+
+    // 3. Call your NEW Generate Route
+    const res = await request(app)
+      .post('/generate')
+      .send({ showtimeId: showtime._id });
+
+    // 4. VERIFY
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBe(1);
-    expect(res.body[0].showtimeId).toBe(fakeId.toString());
+    
+    // We expect exactly 2 seats (because layout was 1, 0, 1)
+    const seats = await Seat.find({ showtimeId: showtime._id });
+    expect(seats.length).toBe(2);
+
+    // Check that the middle seat (number 2) was SKIPPED
+    const seatNumbers = seats.map(s => s.number);
+    expect(seatNumbers).toContain(1); // Row A, Seat 1
+    expect(seatNumbers).toContain(3); // Row A, Seat 3
+    expect(seatNumbers).not.toContain(2); // Seat 2 should be missing (Aisle)
+    
+    // Check price came from Showtime
+    expect(seats[0].price).toBe(1500);
   });
+
 });
