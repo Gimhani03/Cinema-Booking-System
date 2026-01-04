@@ -22,6 +22,7 @@ exports.getAllShowtimes = async (req, res) => {
   try {
     const showtimes = await Showtime.find()
       .populate('movie', 'title') 
+      .populate('hall', 'name');
 
     res.status(200).json({ success: true, data: showtimes });
   } catch (error) {
