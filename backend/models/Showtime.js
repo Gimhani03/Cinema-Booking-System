@@ -7,7 +7,7 @@ const showtimeSchema = new mongoose.Schema({
     required: true
   },
   hall: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Hall', 
     required: true
   },

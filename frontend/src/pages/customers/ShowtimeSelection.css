@@ -1,3 +1,4 @@
+/* --- PAGE GENERAL --- */
 .selection-page {
   background-color: #0b0f19; 
   min-height: 100vh;
@@ -6,6 +7,7 @@
   padding-bottom: 50px;
 }
 
+/* --- HEADER (Unchanged) --- */
 .selection-header-banner {
   background-size: cover;
   background-position: center;
@@ -21,9 +23,7 @@
   margin: 0 auto;
 }
 
-.header-poster-wrapper {
-  flex-shrink: 0;
-}
+.header-poster-wrapper { flex-shrink: 0; }
 
 .header-poster {
   width: 120px;
@@ -45,38 +45,26 @@
   line-height: 1;
 }
 
-.meta-tags {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
-}
+.meta-tags { display: flex; gap: 8px; margin-bottom: 10px; }
 
 .tag {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
-    font-size: 0.85rem;
-    border-radius: 20px;
-    font-weight: 600;
-    backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  border-radius: 20px;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
 }
+.tag.rating { background-color: rgba(255, 61, 0, 0.2); color: #ff3d00; }
+.genres { color: #c0c0ff; font-size: 1rem; margin: 0; }
 
-.tag.rating {
-    background-color: rgba(255, 61, 0, 0.2);
-    color: #ff3d00;
-}
-
-.genres {
-  color: #c0c0ff;
-  font-size: 1rem;
-  margin: 0;
-}
-
+/* --- DATE BAR (Unchanged) --- */
 .date-bar-container {
-    background-color: #101420;
-    border-bottom: 1px solid #2c2c54;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-    position: relative;
-    z-index: 10;
+  background-color: #101420;
+  border-bottom: 1px solid #2c2c54;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+  position: relative;
+  z-index: 10;
 }
 
 .date-bar {
@@ -102,10 +90,7 @@
   transition: all 0.3s ease;
 }
 
-.date-card:hover {
-  background-color: #1f2533;
-  border-color: #444;
-}
+.date-card:hover { background-color: #1f2533; border-color: #444; }
 
 .date-card.active {
   background-color: #d32f2f;
@@ -119,71 +104,97 @@
 .date-num { font-size: 1.6rem; font-weight: bold; margin: 3px 0; line-height: 1;}
 .date-day { font-size: 0.85rem; opacity: 0.8;}
 
-
+/* --- MAIN SHOWTIME CONTAINER --- */
 .times-container {
   padding: 30px 5%; 
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.hall-group {
-  margin-bottom: 30px;
-  background-color: #131722;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #252540;
+/* --- NEW: SCOPE CINEMA STYLE ROW LAYOUT --- */
+.scope-hall-row {
+    background-color: #131722;
+    border: 1px solid #252540;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center; /* Vertically center name and buttons */
+    gap: 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-.hall-title {
-  color: #fff;
-  border-left: 4px solid #d32f2f;
-  padding-left: 10px;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  font-size: 1.2rem;
-  letter-spacing: 1px;
-  margin-top: 0;
+/* Left Column: Hall Name */
+.hall-left-col {
+    min-width: 250px; /* Fixed width for alignment */
+    border-right: 1px solid #333; /* Vertical Separator */
+    padding-right: 20px;
+}
+
+.scope-hall-name {
+    color: #00aeef; /* Cyan Blue like Scope/IMAX */
+    font-size: 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1;
+    letter-spacing: 1px;
+}
+
+.scope-subtitle {
+    display: block;
+    margin-top: 8px;
+    color: #666;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* Right Column: Time Buttons */
+.hall-right-col {
+    flex-grow: 1;
 }
 
 .time-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-.time-btn {
-  background: linear-gradient(145deg, #1a1f2e, #131722);
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 10px 20px;
-  min-width: 100px;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+/* Updated Button Style (Outlined, Clean) */
+.scope-time-btn {
+    background: transparent;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 10px 25px;
+    min-width: 110px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.2s ease;
 }
 
-.time-btn:hover {
-  background: #d32f2f;
-  border-color: #d32f2f;
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+.scope-time-btn:hover {
+    border-color: #00aeef; /* Hover Blue */
+    background-color: rgba(0, 174, 239, 0.1); /* Slight tint */
+    transform: translateY(-2px);
 }
 
-.time-text {
-  font-size: 1.2rem;
-  font-weight: 700;
+.scope-time-btn .time-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
 }
 
-.price-text {
-  font-size: 0.8rem;
-  margin-top: 4px;
-  opacity: 0.8;
-  font-weight: 500;
+.scope-time-btn .price-text {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-top: 2px;
 }
 
+/* --- MESSAGES --- */
 .no-showtimes-msg {
   text-align: center;
   color: #777;
@@ -191,27 +202,25 @@
   background: #101420;
   border-radius: 12px;
 }
-
 .no-showtimes-msg h3 { color: #aaa; margin-bottom: 10px; font-size: 1.5rem;}
 
-
+/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
-    .header-container {
-        flex-direction: row; 
-        align-items: center;
-        text-align: left;
-    }
-
-    .header-poster {
-        width: 80px; 
-        height: 120px;
-    }
-
-    .header-content h1 {
-        font-size: 1.6rem;
-    }
-    
-    .selection-header-banner {
-        padding: 20px 5%;
-    }
+  .header-container { flex-direction: row; align-items: center; text-align: left; }
+  .header-poster { width: 80px; height: 120px; }
+  .header-content h1 { font-size: 1.6rem; }
+  
+  /* Stack the row on mobile */
+  .scope-hall-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+  }
+  .hall-left-col {
+      border-right: none;
+      border-bottom: 1px solid #333;
+      padding-bottom: 15px;
+      padding-right: 0;
+      width: 100%;
+  }
 }

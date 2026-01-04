@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createShowtime } from "../../services/showtimeService";
 import { getMovies } from "../../services/movieService"; 
 import "./MovieForm.css"; 
+import axios from "axios"; 
 
 const AddShowtimeForm = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const AddShowtimeForm = () => {
   });
   
   const [movies, setMovies] = useState([]);
+  const [halls, setHalls] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -23,6 +25,10 @@ const AddShowtimeForm = () => {
       try {
         const data = await getMovies();
         setMovies(data);
+
+        const hallRes = await axios.get("http://localhost:5001/api/halls");
+        setHalls(hallRes.data.data || []);
+
       } catch (err) {
         console.error("Failed to load movies", err);
       }
@@ -83,14 +89,19 @@ const AddShowtimeForm = () => {
           </select>
 
           <label>Cinema Hall ID</label>
-          <input
-            type="text"
-            name="hall"  
+          <select
+            name="hall"
             value={formData.hall}
             onChange={handleChange}
-            placeholder="Enter Hall ID (e.g. 650c...)"
             required
-          />
+          >
+            <option value="">-- Select a Hall --</option>
+            {halls.map((hall) => (
+              <option key={hall._id} value={hall._id}>
+                {hall.name} (Capacity: {hall.seatCapacity})
+              </option>
+            ))}
+          </select>
 
           <label>Date</label>
           <input
