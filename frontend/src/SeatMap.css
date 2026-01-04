@@ -1,0 +1,162 @@
+/* SeatMap.css - Scope Cinemas Professional Theme */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+  background-color: #0e1022; /* Deep Navy Background */
+  color: #ffffff;
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+}
+
+.cinema-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+/* Header & Price Bar */
+.header-info {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 20px;
+  width: 100%;
+  max-width: 800px;
+}
+.header-info h2 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
+.header-info p { color: #888; font-size: 0.9rem; margin-top: 5px; }
+
+/* The Curved Screen */
+.screen-container {
+  perspective: 800px;
+  margin-bottom: 60px;
+  display: flex;
+  justify-content: center;
+}
+.screen {
+  background: linear-gradient(to bottom, #fff, transparent);
+  height: 40px;
+  width: 500px;
+  transform: rotateX(-20deg) scale(0.9);
+  box-shadow: 0 40px 60px -10px rgba(255, 255, 255, 0.15);
+  border-radius: 50% 50% 0 0;
+  opacity: 0.4;
+  position: relative;
+}
+/* "SCREEN" Text */
+.screen::after {
+  content: "SCREEN";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px; letter-spacing: 5px; color: #000;
+  font-weight: bold;
+}
+
+/* The Seat Grid */
+.seat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seat-row {
+  display: flex;
+  gap: 8px; /* Standard gap between seats */
+  justify-content: center;
+  align-items: center;
+}
+
+.row-label {
+  width: 30px;
+  text-align: center;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.8rem;
+}
+
+/* The Seat Box */
+.seat {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #4a4d66; /* Subtle Blue Outline */
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: transparent; /* Transparent center like the photo */
+  color: #aaa;
+}
+
+/* Creating the Aisles (Gaps) */
+.aisle-gap {
+  margin-right: 40px; /* Big gap to create walking path */
+}
+
+/* States */
+.seat.AVAILABLE:hover {
+  border-color: #fff;
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+.seat.LOCKED {
+  background-color: #fbbf24; /* Gold */
+  border-color: #fbbf24;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
+.seat.BOOKED {
+  background-color: #ef4444; /* Red */
+  border-color: #ef4444;
+  color: #fff;
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Bottom Legend */
+.legend {
+  margin-top: 50px;
+  display: flex;
+  gap: 30px;
+  background: #1a1d33;
+  padding: 15px 30px;
+  border-radius: 50px;
+}
+.legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #ccc; }
+.legend-box { width: 20px; height: 20px; border-radius: 4px; border: 1px solid #555; }
+
+/* The Bottom Summary Bar */
+.summary-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #1f2238;
+    border-top: 1px solid #333;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    align-items: center;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    z-index: 100;
+}
+.btn-pay {
+    padding: 10px 30px;
+    background: linear-gradient(45deg, #eab308, #ca8a04);
+    border: none;
+    color: black;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.btn-pay:hover { filter: brightness(1.1); }
