@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
-const Seat = require('../../models/Seat'); // Imports your Seat Model
+const Seat = require('../../models/Seat'); 
 
 describe('Seat Model Unit Test', () => {
   
-  // Test 1: It should fail if we try to save a seat without a Row
+  // Test 1: Should fail if Row is missing
   test('Should validate that Row is required', async () => {
-    const seat = new Seat({ number: 1, price: 1000 }); // Missing 'row'
+    const seat = new Seat({ 
+      number: 1, 
+      price: 1000,
+      showtimeId: new mongoose.Types.ObjectId() // ✅ Fake ID added
+    }); 
     
     let err;
     try {
@@ -15,12 +19,16 @@ describe('Seat Model Unit Test', () => {
     }
     
     expect(err).toBeDefined();
-    expect(err.errors.row).toBeDefined(); // Expects an error about 'row'
+    expect(err.errors.row).toBeDefined(); 
   });
 
-  // Test 2: It should fail if we try to save a seat without a Number
+  // Test 2: Should fail if Number is missing
   test('Should validate that Seat Number is required', async () => {
-    const seat = new Seat({ row: 'A', price: 1000 }); // Missing 'number'
+    const seat = new Seat({ 
+      row: 'A', 
+      price: 1000,
+      showtimeId: new mongoose.Types.ObjectId() // ✅ Fake ID added
+    }); 
     
     let err;
     try {
@@ -33,9 +41,15 @@ describe('Seat Model Unit Test', () => {
     expect(err.errors.number).toBeDefined();
   });
 
-  // Test 3: It should pass if everything is correct
+  // Test 3: Should PASS if everything is correct
   test('Should accept a valid seat', async () => {
-    const seat = new Seat({ row: 'A', number: 1, price: 1500, status: 'available' });
+    const seat = new Seat({ 
+      row: 'A', 
+      number: 1, 
+      price: 1500, 
+      status: 'available', // ✅ This is now allowed in the Model
+      showtimeId: new mongoose.Types.ObjectId() // ✅ Fake ID makes it valid
+    });
     
     let err;
     try {
@@ -44,6 +58,6 @@ describe('Seat Model Unit Test', () => {
       err = error;
     }
     
-    expect(err).toBeUndefined(); // No error means success
+    expect(err).toBeUndefined(); // Success!
   });
 });
