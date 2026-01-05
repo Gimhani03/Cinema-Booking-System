@@ -99,7 +99,7 @@ const SeatSelection = () => {
               
               {/* 3. New Button Group with Cancel Button */}
               <div className="button-group">
-                <button className="btn-cancel" onClick={() => navigate('/')}>
+                <button className="btn-cancel" onClick={() => navigate('/home')}>
                     CANCEL
                 </button>
                 <button className="btn-pay">
