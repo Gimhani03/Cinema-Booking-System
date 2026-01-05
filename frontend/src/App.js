@@ -24,6 +24,10 @@ import EditShowtimeForm from "./pages/admin/EditShowtimeForm";
 import ShowtimeSelection from "./pages/customers/ShowtimeSelection";
 import HallManager from './pages/admin/HallManager';
 import SeatSelection from './SeatSelection';
+import BookingSuccess from './pages/BookingSuccess';
+import CreateBookingPage from './pages/CreateBookingPage';
+import MyBookingPage from './pages/MyBookingsPage';
+import './pages/Booking.css';
 
 function App() {
   const role = localStorage.getItem("role"); 
@@ -125,6 +129,9 @@ function App() {
           <Route path="/confirm-password" element={<ConfirmPassword />} />
           <Route path="/seats" element={<SeatSelection />} />
           <Route path="/booking/:showtimeId" element={<SeatSelection />} />
+          <Route path="/create-booking" element={<CreateBookingPage />} />
+          <Route path="/booking-success" element={<BookingSuccess />} />
+          <Route path="/my-bookings" element={<MyBookingPage />} />
           
           <Route
             path="/profile"
