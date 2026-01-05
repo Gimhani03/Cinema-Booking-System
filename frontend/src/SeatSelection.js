@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+// 1. Import useNavigate here
+import { useParams, useNavigate } from 'react-router-dom';
 import './SeatMap.css'; 
 
 const SeatSelection = () => {
   const params = useParams();
+  // 2. Initialize the hook
+  const navigate = useNavigate();
   const showtimeId = params.showtimeId || params.id;
 
   const [seats, setSeats] = useState([]);
@@ -53,14 +56,8 @@ const SeatSelection = () => {
 
       <div className="seat-grid">
         {rows.map(row => {
-            // Get all seats in this row
             const rowSeats = seats.filter(s => s.row === row);
-            
-            // Find the highest seat number to determine row width
-            // e.g., if we have seats 1, 3, 5 -> max is 5.
             const maxSeatNr = Math.max(...rowSeats.map(s => s.number));
-
-            // Create an array for rendering: [1, 2, 3, 4, 5...]
             const renderSlots = Array.from({ length: maxSeatNr }, (_, i) => i + 1);
 
             return (
@@ -68,15 +65,11 @@ const SeatSelection = () => {
                 <span className="row-label">{row}</span>
                 
                 {renderSlots.map(seatNum => {
-                    // Try to find the seat for this number
                     const seat = rowSeats.find(s => s.number === seatNum);
-
                     if (!seat) {
-                        // GAP DETECTED! Render invisible box
                         return <div key={`gap-${row}-${seatNum}`} className="seat gap"></div>;
                     }
 
-                    // SEAT DETECTED! Render actual seat
                     const isSelected = selectedSeatIds.includes(seat._id);
                     const isBooked = seat.status === 'booked' || seat.status === 'locked';
                     
@@ -96,13 +89,23 @@ const SeatSelection = () => {
         })}
       </div>
 
+      {/* Footer Summary */}
       {selectedSeatIds.length > 0 && (
           <div className="summary-bar">
               <div>
                 <strong>{selectedSeatIds.length} Seats</strong>
-                <div style={{fontSize: '0.8em', color: '#ccc'}}>Rs. {totalPrice}</div>
+                <div style={{fontSize: '0.9em', color: '#94a3b8'}}>Rs. {totalPrice}</div>
               </div>
-              <button className="btn-pay">PAY NOW</button>
+              
+              {/* 3. New Button Group with Cancel Button */}
+              <div className="button-group">
+                <button className="btn-cancel" onClick={() => navigate('/')}>
+                    CANCEL
+                </button>
+                <button className="btn-pay">
+                    PAY NOW
+                </button>
+              </div>
           </div>
       )}
     </div>
