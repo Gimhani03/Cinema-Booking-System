@@ -284,15 +284,16 @@ body {
     cursor: pointer;
 }
 .seat.available:hover {
-    background-color: #475569; /* Slightly lighter on hover */
+    background-color: #475569; 
 }
 
-/* 2. Selected Seat (Yellow for contrast) */
+/* 2. Selected Seat (YOUR COLOR) */
 .seat.selected {
-    background-color: #facc15 !important;
-    color: black;
-    border: 2px solid #eab308;
+    background-color: #ff3d00 !important; /* The vivid orange-red you asked for */
+    color: white;
+    border: 2px solid #cc3100; /* Slightly darker border for 3D effect */
     font-weight: bold;
+    box-shadow: 0 0 10px rgba(255, 61, 0, 0.4); /* Glow effect */
 }
 
 /* 3. Booked Seat (Dark Red) */
@@ -317,7 +318,7 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    background: #1e293b; /* Dark background */
+    background: #1e293b; 
     color: white;
     padding: 15px 30px;
     display: flex;
@@ -327,25 +328,26 @@ body {
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* --- New Button Styles --- */
+/* --- Button Styles --- */
 .button-group {
     display: flex;
     gap: 15px;
 }
 
+/* Pay Button (YOUR COLOR) */
 .btn-pay {
     padding: 12px 25px;
-    background: #facc15; /* Yellow */
+    background: #ff3d00; /* The vivid orange-red */
     border: none;
     font-weight: bold;
     cursor: pointer;
-    color: black;
+    color: white;
     border-radius: 6px;
     font-size: 1em;
     transition: background 0.2s;
 }
 .btn-pay:hover {
-    background: #eab308;
+    background: #e63700; /* Slightly darker on hover */
 }
 
 .btn-cancel {
