@@ -25,14 +25,14 @@ afterEach(async () => {
     if (mongoose.connection.readyState === 1) {
         await Booking.deleteMany();
         await Seat.deleteMany();       // ← Clean seats too
-        await Showtime. deleteMany();   // ← Clean showtimes too
+        await Showtime.deleteMany();   // ← Clean showtimes too
     }
 });
 
 afterAll(async () => {
     // ← Add readyState check
     if (mongoose.connection.readyState === 1) {
-        await mongoose. connection.close();
+        await mongoose.connection.close();
     }
     // ← Stop MongoDB Memory Server
     if (mongoServer) {
