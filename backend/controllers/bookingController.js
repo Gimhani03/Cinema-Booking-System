@@ -1,9 +1,19 @@
 const Booking = require('../models/Booking');
-const Seat = require('../models/Seat'); // <--- 1. IMPORT THIS!
+const Seat = require('../models/Seat'); 
 
 // CREATE: Confirm a new booking
+// 1. Create Booking
 exports.createBooking = async (req, res) => {
     try {
+        // 👇 SPY LOGS START
+        console.log("------------------------------------------------");
+        console.log("📝 ATTEMPTING TO CREATE BOOKING:");
+        console.log("   👉 User ID:   ", req.body.userId);
+        console.log("   👉 Showtime:  ", req.body.showtimeId);
+        console.log("   👉 Seats:     ", req.body.seatIds);
+        console.log("------------------------------------------------");
+        // 👆 SPY LOGS END
+
         const { userId, showtimeId, seatIds, totalPrice } = req.body;
 
         // Validation: Prevent double booking
@@ -14,36 +24,48 @@ exports.createBooking = async (req, res) => {
         });
 
         if (existingBooking) {
+            console.log("❌ FAILURE: Seats already booked!");
             return res.status(400).json({ message: "One or more seats are already booked!" });
         }
 
-        // 1. Create the Booking Record
         const newBooking = new Booking({ userId, showtimeId, seatIds, totalPrice });
         await newBooking.save();
 
-        // 2. IMPORTANT: Update the Seats to be "booked"
-        // This puts the "Sold" sticker on the chairs so they turn red/grey
+        // Update Seats
         await Seat.updateMany(
             { _id: { $in: seatIds } }, 
             { $set: { status: 'booked' } }
         );
 
+        console.log("✅ SUCCESS: Booking Created!");
         res.status(201).json({ message: "Booking successful!", booking: newBooking });
     } catch (error) {
-        console.error("Booking Error:", error);
+        console.error("❌ SERVER ERROR in Create:", error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
-// READ: Get history for a specific user
+// 2. Get User History
 exports.getUserBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+        console.log("🔍 CHECKING HISTORY FOR USER:", req.params.userId);
+
+        const bookings = await Booking.find({ userId: req.params.userId })
+            .populate({
+                path: 'showtimeId',   // <--- CHANGED from 'showtime' to 'showtimeId'
+                populate: { path: 'movie' }   
+            })
+            .populate('seatIds')      // <--- CHANGED from 'seats' to 'seatIds'
+            .sort({ createdAt: -1 });         
+
+        console.log(`✅ FOUND ${bookings.length} BOOKINGS.`);
         res.json(bookings);
     } catch (error) {
+        console.error("❌ SERVER ERROR in History:", error);
         res.status(500).json({ message: "Error fetching history" });
     }
 };
+
 
 // UPDATE: Cancel a booking
 exports.cancelBooking = async (req, res) => {
@@ -68,5 +90,25 @@ exports.cancelBooking = async (req, res) => {
         res.json({ message: "Booking cancelled successfully", booking: bookingToCancel });
     } catch (error) {
         res.status(500).json({ message: "Cancel failed", error: error.message });
+    }
+};
+// DELETE: Clear ALL bookings for a user
+exports.clearUserHistory = async (req, res) => {
+    try {
+        // CHANGED: We now get the ID from the "body", not the URL
+        const { userId } = req.body; 
+
+        console.log(`🔥 NUKE COMMAND RECEIVED for user: ${userId}`);
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        await Booking.deleteMany({ userId });
+        
+        res.status(200).json({ message: "History cleared!" });
+    } catch (error) {
+        console.error("Clear History Error:", error);
+        res.status(500).json({ message: "Could not clear history" });
     }
 };

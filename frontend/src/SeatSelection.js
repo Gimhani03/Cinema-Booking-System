@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// 1. Import useNavigate here
 import { useParams, useNavigate } from 'react-router-dom';
 import './SeatMap.css'; 
 
 const SeatSelection = () => {
   const params = useParams();
-  // 2. Initialize the hook
   const navigate = useNavigate();
+  // Support both URL patterns: /seats/:showtimeId OR /seats/:id
   const showtimeId = params.showtimeId || params.id;
 
   const [seats, setSeats] = useState([]);
   const [selectedSeatIds, setSelectedSeatIds] = useState([]); 
   const [loading, setLoading] = useState(true);
 
+  // 1. Fetch Seats for this Showtime
   useEffect(() => {
     const fetchSeats = async () => {
       try {
@@ -28,8 +28,10 @@ const SeatSelection = () => {
     if (showtimeId) fetchSeats();
   }, [showtimeId]);
 
+  // 2. Handle Clicking a Seat (Toggle Selection)
   const handleSeatClick = (seat) => {
     if (seat.status === 'booked' || seat.status === 'locked') return;
+    
     if (selectedSeatIds.includes(seat._id)) {
       setSelectedSeatIds(selectedSeatIds.filter(id => id !== seat._id));
     } else {
@@ -37,8 +39,27 @@ const SeatSelection = () => {
     }
   };
 
+  // Helper to get full seat objects for the next page
   const selectedSeats = seats.filter(seat => selectedSeatIds.includes(seat._id));
   const totalPrice = selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0);
+
+  // 3. Handle Payment (UPDATED: Redirects to Create Booking Form)
+  const handlePayment = () => {
+    if (selectedSeatIds.length === 0) {
+        alert("Please select at least one seat!");
+        return;
+    }
+
+    // INSTEAD of booking immediately, we move to the Form Page
+    // We pass the data (seats, price) so the form knows what you picked
+    navigate('/create-booking', { 
+        state: { 
+            seats: selectedSeats, 
+            showtimeId: showtimeId, 
+            totalPrice: totalPrice 
+        } 
+    });
+  };
 
   if (loading) return <div style={{color:'white', textAlign:'center', marginTop:'50px'}}>Loading...</div>;
 
@@ -97,12 +118,12 @@ const SeatSelection = () => {
                 <div style={{fontSize: '0.9em', color: '#94a3b8'}}>Rs. {totalPrice}</div>
               </div>
               
-              {/* 3. New Button Group with Cancel Button */}
               <div className="button-group">
-                <button className="btn-cancel" onClick={() => navigate('/home')}>
+                <button className="btn-cancel" onClick={() => navigate('/')}>
                     CANCEL
                 </button>
-                <button className="btn-pay">
+                {/* 4. This now goes to the Form Page */}
+                <button className="btn-pay" onClick={handlePayment}>
                     PAY NOW
                 </button>
               </div>

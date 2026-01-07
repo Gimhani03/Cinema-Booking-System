@@ -104,19 +104,19 @@ h1 {
 }
 
 .confirm-btn {
-  background: rgba(255, 77, 0, 0.15);
-  backdrop-filter: blur(10px);
-  color: #ff4d00;
+  /* ... keep your background colors ... */
+  padding: 15px 40px;      /* Standardize padding */
+  min-width: 220px;        /* Force same width */
+  height: 55px;            /* Force same height */
+  display: flex;           /* Flexbox helps center text */
+  align-items: center;
+  justify-content: center;
+  margin: 0;               /* Remove random margins */
   border: 2px solid #ff4d00;
-  padding: 18px 60px;
   border-radius: 50px;
-  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 3px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 280px;
-  margin-bottom: 40px;
+  /* ... keep hover effects ... */
 }
 
 .confirm-btn:hover {
@@ -193,18 +193,19 @@ h1 {
 
 /* Matching the Glassy Button from the Confirmation Page */
 .history-btn {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 15px 40px;
+  /* ... keep your background colors ... */
+  padding: 15px 40px;      /* MATCH the padding above */
+  min-width: 220px;        /* MATCH the width above */
+  height: 55px;            /* MATCH the height above */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Make border thickness match (2px) */
   border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 2px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 20px;
+  /* ... keep hover effects ... */
 }
 
 .history-btn:hover {

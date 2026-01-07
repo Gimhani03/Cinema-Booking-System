@@ -1,15 +1,25 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  // From Member 1
+  // Member 1 (User is still a simple string for now, which is fine)
   userId: { type: String, required: true }, 
-  // From Member 3
-  showtimeId: { type: String, required: true }, 
-  // From Member 5
-  seatIds: { type: [String], required: true }, 
+
+  // 👇 LINK TO SHOWTIME COLLECTION (Fixes "Movie Name Loading...")
+  showtimeId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'Showtime', // This tells Mongoose to look in the "Showtime" table
+      required: true 
+  }, 
+
+  // 👇 LINK TO SEAT COLLECTION (Fixes "Seats" listing)
+  seatIds: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'Seat',     // This tells Mongoose to look in the "Seat" table
+      required: true 
+  }], 
   
   totalPrice: { type: Number, required: true },
-  status: { type: String, default: 'Confirmed' }, // Can be 'Confirmed' or 'Cancelled'
+  status: { type: String, default: 'Confirmed' }, 
   
   // Unique code for the user
   bookingReference: { 
