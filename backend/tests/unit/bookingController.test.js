@@ -20,8 +20,8 @@ describe('Booking Controller Unit Tests', () => {
     it('should create a booking successfully', async () => {
         req.body = {
             userId: 'user_123',
-            showtimeId: 'showtime_abc', // Updated to showtimeId
-            seatIds: ['seat_1', 'seat_2'], // Updated to seatIds
+            showtimeId: 'showtime_abc', // Updated name
+            seatIds: ['seat_1', 'seat_2'], // Updated name
             totalPrice: 2000
         };
 
