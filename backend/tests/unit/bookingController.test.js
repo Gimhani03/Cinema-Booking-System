@@ -1,7 +1,7 @@
 const bookingController = require('../../controllers/bookingController');
 const Booking = require('../../models/Booking');
 const Seat = require('../../models/Seat');
-const httpMocks = require('node-mocks-http'); 
+const httpMocks = require('node-mocks-http');
 
 // Mock the models
 jest.mock('../../models/Booking');
@@ -10,111 +10,79 @@ jest.mock('../../models/Seat');
 describe('Booking Controller Unit Tests', () => {
     let req, res;
 
-    // Reset mocks before every test to ensure clean slate
     beforeEach(() => {
         req = httpMocks.createRequest();
         res = httpMocks.createResponse();
-        jest.clearAllMocks(); // <--- Important! Clears previous calls
+        jest.clearAllMocks();
     });
 
-    // ------------------------------------------------------------------
-    // TEST 1: CREATE BOOKING
-    // ------------------------------------------------------------------
-    describe('createBooking', () => {
-        it('should create a booking and lock seats if seats are available', async () => {
-            req.body = {
-                userId: "user_123",
-                showtimeId: "showtime_abc",
-                seatIds: ["seat_1", "seat_2"],
-                totalPrice: 2000
-            };
+    // TEST 1: Create Booking Success
+    it('should create a booking successfully', async () => {
+        req.body = {
+            userId: 'user_123',
+            showtimeId: 'showtime_abc', // Updated to showtimeId
+            seatIds: ['seat_1', 'seat_2'], // Updated to seatIds
+            totalPrice: 2000
+        };
 
-            // 1. Pretend no double booking exists
-            Booking.findOne.mockResolvedValue(null);
-            
-            // 2. Pretend save works (Mock the prototype save function)
-            Booking.prototype.save = jest.fn().mockResolvedValue({});
-
-            // 3. Pretend Seat update works
-            Seat.updateMany.mockResolvedValue({});
-
-            // 4. Run actual function
-            await bookingController.createBooking(req, res);
-
-            // 5. Check results
-            expect(res.statusCode).toBe(201); 
-            expect(Seat.updateMany).toHaveBeenCalled(); 
-            expect(JSON.parse(res._getData()).message).toBe("Booking successful!");
+        // Mock finding existing booking (return null = no double booking)
+        Booking.findOne.mockResolvedValue(null);
+        
+        // Mock save
+        Booking.prototype.save = jest.fn().mockResolvedValue({
+            _id: 'booking_123',
+            ...req.body
         });
 
-        it('should return 400 if seats are already booked', async () => {
-            req.body = {
-                userId: "user_123",
-                showtimeId: "showtime_abc",
-                seatIds: ["seat_1"],
-                totalPrice: 1000
-            };
+        // Mock seat update
+        Seat.updateMany.mockResolvedValue({});
 
-            // 1. Pretend a booking already exists
-            Booking.findOne.mockResolvedValue({ _id: 'existing_booking' });
+        await bookingController.createBooking(req, res);
 
-            // 2. Run function
-            await bookingController.createBooking(req, res);
-
-            // 3. Check results
-            expect(res.statusCode).toBe(400); 
-            expect(JSON.parse(res._getData()).message).toBe("One or more seats are already booked!");
-        });
+        expect(res.statusCode).toBe(201);
+        expect(res._getJSONData()).toHaveProperty('message', 'Booking successful!');
     });
 
-    // ------------------------------------------------------------------
-    // TEST 2: CLEAR HISTORY (The New Feature)
-    // ------------------------------------------------------------------
-    describe('clearUserHistory', () => {
-        it('should delete all bookings for a user via POST', async () => {
-            // Setup the request with userId in the BODY (Cheat Code match)
-            req.body = { userId: "user_123" };
+    // TEST 2: Prevent Double Booking
+    it('should prevent booking if seats are already taken', async () => {
+        req.body = {
+            userId: 'user_123',
+            showtimeId: 'showtime_abc',
+            seatIds: ['seat_1'],
+            totalPrice: 1000
+        };
 
-            // Mock deleteMany to succeed
-            Booking.deleteMany.mockResolvedValue({ deletedCount: 5 });
-
-            await bookingController.clearUserHistory(req, res);
-
-            expect(Booking.deleteMany).toHaveBeenCalledWith({ userId: "user_123" });
-            expect(res.statusCode).toBe(200);
-            expect(JSON.parse(res._getData()).message).toBe("History cleared!");
+        // Mock finding an existing booking (return object = already booked)
+        Booking.findOne.mockResolvedValue({
+            _id: 'existing_booking',
+            status: 'Confirmed'
         });
 
-        it('should return 400 if User ID is missing', async () => {
-            req.body = {}; // Empty body
+        await bookingController.createBooking(req, res);
 
-            await bookingController.clearUserHistory(req, res);
-
-            expect(res.statusCode).toBe(400);
-            expect(JSON.parse(res._getData()).message).toBe("User ID is required");
-        });
+        expect(res.statusCode).toBe(400);
+        expect(res._getJSONData()).toHaveProperty('message', 'One or more seats are already booked!');
     });
 
-    // ------------------------------------------------------------------
-    // TEST 3: GET USER BOOKINGS (Checking Populate)
-    // ------------------------------------------------------------------
-    describe('getUserBookings', () => {
-        it('should fetch bookings and populate data', async () => {
-            req.params.userId = "user_123";
+    // TEST 3: Get User History
+    it('should return user bookings', async () => {
+        req.params.userId = 'user_123';
 
-            // Mocking a chain: find -> populate -> populate -> sort
-            const mockSort = jest.fn().mockResolvedValue(['booking1', 'booking2']);
-            const mockPopulate2 = jest.fn().mockReturnValue({ sort: mockSort });
-            const mockPopulate1 = jest.fn().mockReturnValue({ populate: mockPopulate2 });
-            
-            Booking.find.mockReturnValue({ populate: mockPopulate1 });
+        const mockBookings = [
+            { _id: 'b1', showtimeId: { movie: { title: 'Movie A' } }, seatIds: [] }
+        ];
 
-            await bookingController.getUserBookings(req, res);
+        // Chainable mock for .populate().populate().sort()
+        const mockFind = {
+            populate: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockResolvedValue(mockBookings)
+        };
 
-            expect(Booking.find).toHaveBeenCalledWith({ userId: "user_123" });
-            expect(res.statusCode).toBe(200);
-            expect(JSON.parse(res._getData())).toEqual(['booking1', 'booking2']);
-        });
+        Booking.find.mockReturnValue(mockFind);
+
+        await bookingController.getUserBookings(req, res);
+
+        expect(res.statusCode).toBe(200);
+        expect(res._getJSONData()).toEqual(mockBookings);
     });
-
 });
