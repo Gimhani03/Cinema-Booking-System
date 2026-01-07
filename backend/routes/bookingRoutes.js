@@ -1,70 +1,26 @@
-const request = require('supertest');
-const app = require('../../app');
-const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const Booking = require('../../models/Booking');
-const Seat = require('../../models/Seat');       // ← Add this
-const Showtime = require('../../models/Showtime'); // ← Add this
+const express = require('express');
+const router = express.Router();
+const bookingController = require('../controllers/bookingController');
 
-let mongoServer;
+// Debug Log
+console.log("ROUTER RELOADED: POST METHOD IS ACTIVE!");                                                                                                              // ----------------------------------------------------
+// 1. Clear History (Cheat Code: POST)
+// ----------------------------------------------------
+router.post('/clear-history', bookingController.clearUserHistory);
 
-// ← Add timeout for MongoDB Memory Server
-jest.setTimeout(60000);
+// ----------------------------------------------------
+// 2. Create Booking
+// ----------------------------------------------------
+router.post('/', bookingController.createBooking);
 
-beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    
-    // ← Disconnect first (like other tests do)
-    await mongoose.disconnect();
-    await mongoose.connect(uri);
-});
+// ----------------------------------------------------
+// 3. Get User History
+// ----------------------------------------------------
+router.get('/user/:userId', bookingController.getUserBookings);
 
-afterEach(async () => {
-    // Clean up test data
-    if (mongoose.connection.readyState === 1) {
-        await Booking.deleteMany();
-        await Seat.deleteMany();       // ← Clean seats too
-        await Showtime.deleteMany();   // ← Clean showtimes too
-    }
-});
+// ----------------------------------------------------
+// 4. Cancel Single Booking (YOU WERE MISSING THIS!)
+// ----------------------------------------------------
+router.delete('/:id', bookingController.cancelBooking);
 
-afterAll(async () => {
-    // ← Add readyState check
-    if (mongoose.connection.readyState === 1) {
-        await mongoose.connection.close();
-    }
-    // ← Stop MongoDB Memory Server
-    if (mongoServer) {
-        await mongoServer.stop();
-    }
-});
-
-describe('Booking API Integration Tests', () => {
-    
-    it('POST /api/bookings - should successfully create a booking', async () => {
-        const validFakeShowtimeId = "659c16c9e5480d2274478f5a";
-        const validFakeSeatId = "659c16c9e5480d2274478f5b";
-
-        const response = await request(app)
-            .post('/api/bookings')
-            .send({
-                userId: "user_123", 
-                showtimeId: validFakeShowtimeId,
-                seatIds: [validFakeSeatId],
-                totalPrice: 1500
-            });
-
-        expect([201, 400]).toContain(response.statusCode);
-    });
-
-    it('POST /api/bookings - should fail if data is missing', async () => {
-        const response = await request(app)
-            .post('/api/bookings')
-            .send({
-                userId: "user_123"
-            });
-
-        expect(response.statusCode).not.toBe(201);
-    });
-});
+module.exports = router;
