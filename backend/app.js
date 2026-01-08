@@ -6,6 +6,7 @@ const passwordRoutes = require("./routes/password");
 const showtimeRoutes = require('./routes/showtimeRoutes');
 const hallRoutes = require('./routes/hallRoutes');
 const seatRoutes = require('./routes/seatRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.use("/api/password", passwordRoutes);
 app.use('/api/showtimes', showtimeRoutes);
 app.use('/api/halls', hallRoutes);
 app.use('/api/seats', seatRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 module.exports = app;

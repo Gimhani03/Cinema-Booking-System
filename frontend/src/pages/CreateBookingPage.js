@@ -1,0 +1,142 @@
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import './Booking.css'; 
+
+const CreateBookingPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Open the backpack (Get data from Seat Page)
+  const bookingData = location.state || {}; 
+  const { seats, showtimeId, totalPrice } = bookingData;
+
+  const [movieDetails, setMovieDetails] = useState(null);
+
+  // --- THE BULLETPROOF MOVIE FETCHER ---
+  useEffect(() => {
+    const fetchMovieInfo = async () => {
+        if (!showtimeId) return;
+
+        try {
+            console.log("1. Fetching Showtime for ID:", showtimeId);
+            const showtimeRes = await axios.get(`http://localhost:5001/api/showtimes/${showtimeId}`);
+            const data = showtimeRes.data;
+            
+            console.log("2. Showtime Data Received:", data);
+
+            // DETECT MOVIE ID (Checks multiple locations)
+            // It might be data.movie, or data.data.movie, or data.showtime.movie
+            let rawMovie = data.movie || (data.data && data.data.movie) || (data.showtime && data.showtime.movie);
+
+            let movieId = null;
+            let movieTitle = null;
+
+            // ANALYZE WHAT WE FOUND
+            if (!rawMovie) {
+                console.error("❌ Could not find 'movie' field in response");
+            } else if (typeof rawMovie === 'object' && rawMovie.title) {
+                // Case A: We got the full movie object already!
+                console.log("✅ Found Full Movie Object");
+                setMovieDetails(rawMovie);
+                return;
+            } else if (typeof rawMovie === 'object' && rawMovie._id) {
+                // Case B: We got an object, but need to extract the ID
+                movieId = rawMovie._id;
+            } else {
+                // Case C: It's just a String ID (Most Common)
+                movieId = rawMovie;
+            }
+
+            // STEP 3: FETCH MOVIE DETAILS (If we only have an ID)
+            if (movieId) {
+                console.log("3. Fetching Movie Details for ID:", movieId);
+                const movieRes = await axios.get(`http://localhost:5001/api/movies/${movieId}`);
+                
+                // Hunt for the title in the second response
+                const mData = movieRes.data;
+                console.log("4. Movie API Response:", mData);
+
+                // Check common spots for title
+                movieTitle = mData.title || (mData.movie && mData.movie.title) || (mData.data && mData.data.title);
+                
+                if (movieTitle) {
+                    setMovieDetails({ title: movieTitle });
+                } else {
+                    setMovieDetails({ title: "Title Not Found in API" });
+                }
+            } else {
+                setMovieDetails({ title: "Movie ID Missing" });
+            }
+
+        } catch (err) {
+            console.error("❌ CRITICAL ERROR:", err);
+            setMovieDetails({ title: "Network Error" });
+        }
+    };
+
+    fetchMovieInfo();
+  }, [showtimeId]);
+
+  const handleConfirmBooking = async () => {
+    try {
+        const payload = {
+            userId: "user_123", 
+            showtimeId: showtimeId,
+            seatIds: seats.map(s => s._id),
+            totalPrice: totalPrice
+        };
+
+        await axios.post('http://localhost:5001/api/bookings', payload);
+        navigate('/booking-success');
+    } catch (error) {
+        console.error("Booking Error:", error);
+        alert("Payment failed.");
+    }
+  };
+
+  return (
+    <div className="booking-container">
+      <div className="booking-card">
+        
+        {/* Title */}
+        <h1>CONFIRM BOOKING</h1>
+        
+        <div className="summary-details">
+            {/* Movie Name Row */}
+            <div className="detail-row">
+                <span className="label">Movie Name</span>
+                <span className="value">
+                    {/* Now this will show the Real Title! */}
+                    {movieDetails ? movieDetails.title : "Loading..."}
+                </span>
+            </div>
+
+            {/* Seats Row */}
+            <div className="detail-row">
+                <span className="label">Selected Seats</span>
+                <span className="value">
+                    {seats ? seats.map(s => `${s.row}${s.number}`).join(', ') : 'None'}
+                </span>
+            </div>
+        </div>
+
+        {/* Price Section */}
+        <div className="price-section">
+            <span className="price-label">Total Amount</span>
+            <span className="price-amount">Rs. {totalPrice || 0}</span>
+        </div>
+
+        {/* Confirm Button */}
+        <div className="confirm-btn-container">
+            <button onClick={handleConfirmBooking} className="confirm-btn">
+                CONFIRM & PAY NOW
+            </button>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default CreateBookingPage;
