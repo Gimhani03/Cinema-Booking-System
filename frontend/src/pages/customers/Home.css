@@ -16,7 +16,9 @@
 
 .hero-slide-img {
   width: 100%;
-  object-fit: cover; 
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 }
 
 .hero-overlay {
@@ -32,6 +34,13 @@
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 10px;
+  color: #fff !important;
+}
+
+.hero-title:hover,
+.hero-title:active,
+.hero-title:focus {
+  color: #fff !important;
 }
 
 .hero-genre {
