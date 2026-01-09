@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 import './Booking.css';
 
 const MyBookingsPage = () => {
@@ -63,6 +64,36 @@ const MyBookingsPage = () => {
 
   return (
     <div className="history-page-container">
+      <button 
+        onClick={() => navigate('/')} 
+        style={{
+          position: 'absolute',
+          left: '20px',
+          top: '20px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          color: 'white',
+          padding: '10px 15px',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          transition: 'all 0.3s ease',
+          zIndex: 10
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 61, 0, 0.2)';
+          e.currentTarget.style.borderColor = '#ff3d00';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        }}
+      >
+        <FaArrowLeft />
+      </button>
       <div className="history-page-wrapper">
         
         {/* Left Side: Title Box */}
