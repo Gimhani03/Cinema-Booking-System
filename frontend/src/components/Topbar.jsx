@@ -135,8 +135,13 @@ const Topbar = () => {
         <MdMovie /> Movies
       </NavLink>
       <NavLink to="/about" onClick={() => setMobileOpen(false)}>
-      <MdInfo /> About Us
-    </NavLink>
+        <MdInfo /> About Us
+      </NavLink>
+      {isAuthenticated && (
+        <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
+          <MdConfirmationNumber /> My Bookings
+        </NavLink>
+      )}
     </>
   );
 
