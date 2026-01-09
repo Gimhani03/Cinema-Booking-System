@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 import './SeatMap.css'; 
 
 const SeatSelection = () => {
@@ -50,6 +51,14 @@ const SeatSelection = () => {
         return;
     }
 
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please login to continue with booking!");
+        navigate('/login');
+        return;
+    }
+
     // INSTEAD of booking immediately, we move to the Form Page
     // We pass the data (seats, price) so the form knows what you picked
     navigate('/create-booking', { 
@@ -68,6 +77,35 @@ const SeatSelection = () => {
   return (
     <div className="cinema-container">
       <div className="header-info">
+        <button 
+          onClick={() => navigate(-1)} 
+          style={{
+            position: 'absolute',
+            left: '20px',
+            top: '20px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: 'white',
+            padding: '10px 15px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 61, 0, 0.2)';
+            e.currentTarget.style.borderColor = '#ff3d00';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+          }}
+        >
+          <FaArrowLeft />
+        </button>
         <h2>SELECT YOUR SEATS</h2>
       </div>
       
