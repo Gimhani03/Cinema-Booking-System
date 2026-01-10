@@ -70,7 +70,7 @@ const userId = user._id || user.id;
   return (
     <div className="history-page-container">
       <button 
-        onClick={() => navigate('/')} 
+        onClick={() => navigate('/home')} 
         style={{
           position: 'absolute',
           left: '20px',
