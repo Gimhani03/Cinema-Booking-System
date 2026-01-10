@@ -117,7 +117,7 @@ const Topbar = () => {
         <MdTheaters /> Halls
       </NavLink>
     
-      <NavLink to="/bookings" onClick={() => setMobileOpen(false)}>
+      <NavLink to="/admin/bookings" onClick={() => setMobileOpen(false)}>
         <MdConfirmationNumber /> Bookings
       </NavLink>
       <NavLink to="/payments" onClick={() => setMobileOpen(false)}>
