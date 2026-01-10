@@ -113,6 +113,26 @@ const SeatSelection = () => {
         <div className="screen">SCREEN</div>
       </div>
 
+      {/* Seat Legend */}
+      <div className="seat-legend">
+        <div className="legend-item">
+          <div className="legend-box selected"></div>
+          <span>Selected</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-box available"></div>
+          <span>Available</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-box booked"></div>
+          <span>Occupied</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-box unavailable"></div>
+          <span>Unavailable</span>
+        </div>
+      </div>
+
       <div className="seat-grid">
         {rows.map(row => {
             const rowSeats = seats.filter(s => s.row === row);
