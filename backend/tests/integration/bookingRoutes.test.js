@@ -26,7 +26,8 @@ afterEach(async () => {
     if (mongoose.connection.readyState === 1) {
         await Booking.deleteMany();
         await Seat.deleteMany();       // ← Clean seats too
-        await Showtime. deleteMany();   // ← Clean showtimes too
+        await User.deleteMany();   
+        await Showtime.deleteMany();   // ← Clean showtimes too
     }
 });
 
@@ -44,6 +45,13 @@ afterAll(async () => {
 describe('Booking API Integration Tests', () => {
     
     it('POST /api/bookings - should successfully create a booking', async () => {
+        // Create a fake user first
+        const fakeUser = await User.create({
+            name: 'Test User',
+            email: 'test@example.com',
+            password: 'password123'
+    });
+
         const validFakeShowtimeId = "659c16c9e5480d2274478f5a";
         const validFakeSeatId = "659c16c9e5480d2274478f5b";
 
