@@ -134,6 +134,53 @@ body {
 .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #ccc; }
 .legend-box { width: 20px; height: 20px; border-radius: 4px; border: 1px solid #555; }
 
+/* Seat Legend - Above the Grid */
+.seat-legend {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding: 15px 30px;
+  background: rgba(26, 29, 51, 0.5);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.seat-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.seat-legend .legend-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid #4a4d66;
+}
+
+.seat-legend .legend-box.selected {
+  background-color: #ff3d00;
+  border-color: #ff3d00;
+}
+
+.seat-legend .legend-box.available {
+  background-color: transparent;
+  border-color: #4a4d66;
+}
+
+.seat-legend .legend-box.booked {
+  background-color: #ef4444;
+  border-color: #ef4444;
+}
+
+.seat-legend .legend-box.unavailable {
+  background-color: #0e1022;
+  border-color: #4a4d66;
+}
+
 /* The Bottom Summary Bar */
 .summary-bar {
     position: fixed;
