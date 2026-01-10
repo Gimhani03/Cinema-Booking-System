@@ -76,7 +76,8 @@ const AdminBookings = () => {
     if (searchTerm) {
       filtered = filtered.filter(booking => 
         booking.bookingReference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.userId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.showtimeId?.movie?.title?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -130,7 +131,7 @@ const AdminBookings = () => {
       
       return [
         b.bookingReference || 'N/A',
-        b.userId || 'N/A',
+        b.userId?.name || b.userId?.email || b.userId || 'N/A',
         b.showtimeId?.movie?.title || 'N/A',
         seats,
         `Rs. ${b.totalPrice || 0}`,
@@ -279,7 +280,7 @@ const AdminBookings = () => {
           <thead>
             <tr>
               <th>Booking Ref</th>
-              <th>Customer ID</th>
+              <th>Customer</th>
               <th>Movie</th>
               <th>Date & Time</th>
               <th>Seats</th>
@@ -304,7 +305,9 @@ const AdminBookings = () => {
                       #{booking.bookingReference || booking._id.slice(-6).toUpperCase()}
                     </span>
                   </td>
-                  <td>{booking.userId || 'N/A'}</td>
+                  <td>
+                    {booking.userId?.name || booking.userId?.email || booking.userId || 'N/A'}
+                  </td>
                   <td className="movie-cell">
                     {booking.showtimeId?.movie?.title || 'Unknown'}
                   </td>
@@ -387,8 +390,15 @@ const AdminBookings = () => {
                 </span>
               </div>
               <div className="detail-row">
-                <label>Customer ID:</label>
-                <span>{selectedBooking.userId}</span>
+                <label>Customer:</label>
+                <span>
+                  {selectedBooking.userId?.name || selectedBooking.userId?.email || selectedBooking.userId || 'N/A'}
+                  {selectedBooking.userId?.email && selectedBooking.userId?.name && (
+                    <span style={{ display: 'block', fontSize: '0.85em', color: '#888' }}>
+                      {selectedBooking.userId.email}
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="detail-row">
                 <label>Movie:</label>
