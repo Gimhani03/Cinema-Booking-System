@@ -1,6 +1,32 @@
 const Booking = require('../models/Booking');
 const Seat = require('../models/Seat'); 
 
+// Get ALL bookings (Admin)
+exports.getAllBookings = async (req, res) => {
+    try {
+        const bookings = await Booking.find()
+            .populate({
+                path: 'showtimeId',
+                populate: [
+                    { path: 'movie' },
+                    { path: 'hall' }
+                ]
+            })
+            .populate('seatIds')
+            .sort({ createdAt: -1 });
+
+        // Debug log to check seat population
+        if (bookings.length > 0) {
+            console.log('📊 Sample booking seats:', bookings[0].seatIds);
+        }
+
+        res.json(bookings);
+    } catch (error) {
+        console.error("Error fetching all bookings:", error);
+        res.status(500).json({ message: "Error fetching bookings" });
+    }
+};
+
 // CREATE: Confirm a new booking
 // 1. Create Booking
 exports.createBooking = async (req, res) => {
@@ -28,7 +54,22 @@ exports.createBooking = async (req, res) => {
             return res.status(400).json({ message: "One or more seats are already booked!" });
         }
 
-        const newBooking = new Booking({ userId, showtimeId, seatIds, totalPrice });
+        // 👇 NEW: Fetch actual seat details to store permanently
+        const seats = await Seat.find({ _id: { $in: seatIds } });
+        const seatDetails = seats.map(s => ({
+            row: s.row,
+            number: s.number,
+            price: s.price,
+            seatId: s._id
+        }));
+
+        const newBooking = new Booking({ 
+            userId, 
+            showtimeId, 
+            seatIds,
+            seatDetails, // Store seat info permanently
+            totalPrice 
+        });
         await newBooking.save();
 
         // Update Seats
