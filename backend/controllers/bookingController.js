@@ -5,6 +5,7 @@ const Seat = require('../models/Seat');
 exports.getAllBookings = async (req, res) => {
     try {
         const bookings = await Booking.find()
+            .populate('userId', 'name email')
             .populate({
                 path: 'showtimeId',
                 populate: [
