@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaDownload, FaEye, FaTimes, FaFilter } from 'react-icons/fa';
-import { MdRefresh } from 'react-icons/md';
+import { FaSearch, FaDownload, FaEye, FaTimes, FaFilter, FaCheckCircle, FaTimesCircle, FaMoneyBillWave, FaCalendarDay } from 'react-icons/fa';
+import { MdRefresh, MdBarChart } from 'react-icons/md';
 import axios from 'axios';
 import './AdminBookings.css';
 
@@ -179,35 +179,35 @@ const AdminBookings = () => {
       {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon total">📊</div>
+          <div className="stat-icon total"><MdBarChart /></div>
           <div className="stat-content">
             <h3>{stats.total}</h3>
             <p>Total Bookings</p>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon confirmed">✅</div>
+          <div className="stat-icon confirmed"><FaCheckCircle /></div>
           <div className="stat-content">
             <h3>{stats.confirmed}</h3>
             <p>Confirmed</p>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon cancelled">❌</div>
+          <div className="stat-icon cancelled"><FaTimesCircle /></div>
           <div className="stat-content">
             <h3>{stats.cancelled}</h3>
             <p>Cancelled</p>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon revenue">💰</div>
+          <div className="stat-icon revenue"><FaMoneyBillWave /></div>
           <div className="stat-content">
             <h3>Rs. {stats.totalRevenue.toLocaleString()}</h3>
             <p>Total Revenue</p>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon today">📅</div>
+          <div className="stat-icon today"><FaCalendarDay /></div>
           <div className="stat-content">
             <h3>{stats.todayBookings}</h3>
             <p>Today's Bookings</p>
