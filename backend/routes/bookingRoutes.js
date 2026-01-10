@@ -3,7 +3,13 @@ const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 
 // Debug Log
-console.log("ROUTER RELOADED: POST METHOD IS ACTIVE!");                                                                                                              // ----------------------------------------------------
+console.log("ROUTER RELOADED: POST METHOD IS ACTIVE!"); 
+
+// ----------------------------------------------------
+// NEW: GET ALL BOOKINGS (Admin)
+// ----------------------------------------------------
+router.get('/all', bookingController.getAllBookings);  
+// ----------------------------------------------------                                                                                                            // ----------------------------------------------------
 // 1. Clear History (Cheat Code: POST)
 // ----------------------------------------------------
 router.post('/clear-history', bookingController.clearUserHistory);

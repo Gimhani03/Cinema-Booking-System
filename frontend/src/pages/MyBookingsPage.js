@@ -9,11 +9,16 @@ const MyBookingsPage = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Hardcoded User ID for testing
-  const userId = "user_123";
+// Get actual logged-in user ID
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const userId = user._id || user.id;
 
   useEffect(() => {
     const fetchHistory = async () => {
+      if (!userId) {
+            setLoading(false);
+            return;
+      }
       try {
         const res = await axios.get(`http://localhost:5001/api/bookings/user/${userId}`);
         
@@ -31,7 +36,7 @@ const MyBookingsPage = () => {
       }
     };
     fetchHistory();
-  }, []);
+  }, [userId]);
 
   const handleCancel = async (id) => {
     if(!window.confirm("Are you sure you want to cancel this booking?")) return;
@@ -52,8 +57,8 @@ const MyBookingsPage = () => {
     
     // If seats are objects (Populated)
     if (typeof seats[0] === 'object') {
-        // Try to find the seat number property (adjust 'seatNumber' if your DB uses 'number' or 'label')
-        return seats.map(s => s.seatNumber || s.number || `${s.row}${s.number}`).join(", ");
+       // Seat model has 'row' (String) and 'number' (Number)
+        return seats.map(s => `${s.row}${s.number}`).join(", ");
     }
     
     // If seats are just strings (IDs) - Fallback
@@ -118,7 +123,7 @@ const MyBookingsPage = () => {
                   if(window.confirm("Delete ALL history? This cannot be undone.")) {
                       try {
                           await axios.post('http://localhost:5001/api/bookings/clear-history', { 
-                              userId: 'user_123' 
+                              userId: userId
                           });
                           window.location.reload(); 
                       } catch (err) {

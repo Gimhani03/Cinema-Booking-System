@@ -27,6 +27,11 @@ describe('Booking Controller Unit Tests', () => {
 
         // Mock finding existing booking (return null = no double booking)
         Booking.findOne.mockResolvedValue(null);
+        // Mock Seat.find to return seat details
+        Seat.find.mockResolvedValue([
+            { _id: 'seat_1', row: 'A', number: 1, price: 1000 },
+            { _id: 'seat_2', row: 'A', number: 2, price: 1000 }
+        ]);
         
         // Mock save
         Booking.prototype.save = jest.fn().mockResolvedValue({

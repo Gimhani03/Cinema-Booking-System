@@ -23,6 +23,7 @@ import AddShowtimeForm from "./pages/admin/AddShowtimeForm";
 import EditShowtimeForm from "./pages/admin/EditShowtimeForm";
 import ShowtimeSelection from "./pages/customers/ShowtimeSelection";
 import HallManager from './pages/admin/HallManager';
+import AdminBookings from './pages/admin/AdminBookings';
 import SeatSelection from './SeatSelection';
 import BookingSuccess from './pages/BookingSuccess';
 import CreateBookingPage from './pages/CreateBookingPage';
@@ -139,6 +140,17 @@ function App() {
               <ProtectedRoute>
                 <PageLayout>
                   <Profile />
+                </PageLayout>
+              </ProtectedRoute>
+            }
+          />
+          {/*Admin Bookings Route */}
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute roleRequired="admin">
+                <PageLayout isAdmin={true}>
+                  <AdminBookings />
                 </PageLayout>
               </ProtectedRoute>
             }
