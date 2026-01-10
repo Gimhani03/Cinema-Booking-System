@@ -119,15 +119,25 @@ const AdminBookings = () => {
 
   const exportToCSV = () => {
     const headers = ['Booking Ref', 'Customer', 'Movie', 'Seats', 'Amount', 'Status', 'Date'];
-    const rows = filteredBookings.map(b => [
-      b.bookingReference || 'N/A',
-      b.userId || 'N/A',
-      b.showtimeId?.movie?.title || 'N/A',
-      b.seatIds?.map(s => `${s.row}${s.number}`).join(', ') || 'N/A',
-      `Rs. ${b.totalPrice || 0}`,
-      b.status,
-      new Date(b.createdAt).toLocaleDateString()
-    ]);
+    const rows = filteredBookings.map(b => {
+      // Get seats from either seatDetails or seatIds
+      let seats = 'N/A';
+      if (b.seatDetails?.length > 0) {
+        seats = b.seatDetails.map(s => `${s.row}${s.number}`).join(', ');
+      } else if (b.seatIds?.length > 0 && b.seatIds[0]?.row) {
+        seats = b.seatIds.map(s => `${s.row}${s.number}`).join(', ');
+      }
+      
+      return [
+        b.bookingReference || 'N/A',
+        b.userId || 'N/A',
+        b.showtimeId?.movie?.title || 'N/A',
+        seats,
+        `Rs. ${b.totalPrice || 0}`,
+        b.status,
+        new Date(b.createdAt).toLocaleDateString()
+      ];
+    });
 
     let csvContent = headers.join(',') + '\n';
     rows.forEach(row => {
@@ -307,9 +317,21 @@ const AdminBookings = () => {
                     ) : 'N/A'}
                   </td>
                   <td className="seats-cell">
-                    {booking.seatIds?.length > 0 
-                      ? booking.seatIds.map(s => `${s.row}${s.number}`).join(', ')
-                      : 'N/A'}
+                    {(() => {
+                      // Try seatDetails first (historical record)
+                      if (booking.seatDetails?.length > 0) {
+                        return booking.seatDetails.map(s => `${s.row}${s.number}`).join(', ');
+                      }
+                      // Try populated seatIds
+                      if (booking.seatIds?.length > 0 && booking.seatIds[0]?.row) {
+                        return booking.seatIds.map(s => `${s.row}${s.number}`).join(', ');
+                      }
+                      // Fallback: just show count if seatIds exist but not populated
+                      if (booking.seatIds?.length > 0) {
+                        return `${booking.seatIds.length} seat(s)`;
+                      }
+                      return 'N/A';
+                    })()}
                   </td>
                   <td className="amount-cell">
                     Rs. {booking.totalPrice?.toLocaleString() || 0}
