@@ -88,9 +88,19 @@ const CreateBookingPage = () => {
         return;
     }
 
+     // Get actual user ID
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userId = user._id || user.id;
+    
+    if (!userId) {
+        alert("User information missing. Please login again.");
+        navigate('/login');
+        return;
+    }
+
     try {
         const payload = {
-            userId: "user_123", 
+            userId: userId, 
             showtimeId: showtimeId,
             seatIds: seats.map(s => s._id),
             totalPrice: totalPrice
