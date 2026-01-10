@@ -1,8 +1,12 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  // Member 1 (User is still a simple string for now, which is fine)
-  userId: { type: String, required: true }, 
+  // Reference to User collection
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true 
+  }, 
 
   //  LINK TO SHOWTIME COLLECTION (Fixes "Movie Name Loading...")
   showtimeId: { 
