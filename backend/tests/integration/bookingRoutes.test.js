@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const Booking = require('../../models/Booking');
 const Seat = require('../../models/Seat');       // ← Add this
+const User = require('../../models/User');
 const Showtime = require('../../models/Showtime'); // ← Add this
 
 let mongoServer;
@@ -49,7 +50,7 @@ describe('Booking API Integration Tests', () => {
         const response = await request(app)
             .post('/api/bookings')
             .send({
-                userId: "user_123", 
+                userId: fakeUser._id, 
                 showtimeId: validFakeShowtimeId,
                 seatIds: [validFakeSeatId],
                 totalPrice: 1500
