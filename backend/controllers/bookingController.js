@@ -34,7 +34,7 @@ exports.createBooking = async (req, res) => {
     try {
         // 👇 SPY LOGS START
         console.log("------------------------------------------------");
-        console.log("📝 ATTEMPTING TO CREATE BOOKING:");
+        console.log("ATTEMPTING TO CREATE BOOKING:");
         console.log("   👉 User ID:   ", req.body.userId);
         console.log("   👉 Showtime:  ", req.body.showtimeId);
         console.log("   👉 Seats:     ", req.body.seatIds);
@@ -51,7 +51,7 @@ exports.createBooking = async (req, res) => {
         });
 
         if (existingBooking) {
-            console.log("❌ FAILURE: Seats already booked!");
+            console.log("FAILURE: Seats already booked!");
             return res.status(400).json({ message: "One or more seats are already booked!" });
         }
 
@@ -79,10 +79,10 @@ exports.createBooking = async (req, res) => {
             { $set: { status: 'booked' } }
         );
 
-        console.log("✅ SUCCESS: Booking Created!");
+        console.log("SUCCESS: Booking Created!");
         res.status(201).json({ message: "Booking successful!", booking: newBooking });
     } catch (error) {
-        console.error("❌ SERVER ERROR in Create:", error);
+        console.error("SERVER ERROR in Create:", error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
@@ -92,7 +92,12 @@ exports.getUserBookings = async (req, res) => {
     try {
         console.log("🔍 CHECKING HISTORY FOR USER:", req.params.userId);
 
-        const bookings = await Booking.find({ userId: req.params.userId })
+        // Only show bookings that are NOT hidden by the user
+        const bookings = await Booking.find({ 
+            userId: req.params.userId,
+            hiddenFromUser: { $ne: true }  // Exclude hidden bookings
+        })
+            .populate('userId', 'name email')
             .populate({
                 path: 'showtimeId',   // <--- CHANGED from 'showtime' to 'showtimeId'
                 populate: { path: 'movie' }   
@@ -100,10 +105,10 @@ exports.getUserBookings = async (req, res) => {
             .populate('seatIds')      // <--- CHANGED from 'seats' to 'seatIds'
             .sort({ createdAt: -1 });         
 
-        console.log(`✅ FOUND ${bookings.length} BOOKINGS.`);
+        console.log(`FOUND ${bookings.length} VISIBLE BOOKINGS.`);
         res.json(bookings);
     } catch (error) {
-        console.error("❌ SERVER ERROR in History:", error);
+        console.error("SERVER ERROR in History:", error);
         res.status(500).json({ message: "Error fetching history" });
     }
 };
@@ -134,21 +139,31 @@ exports.cancelBooking = async (req, res) => {
         res.status(500).json({ message: "Cancel failed", error: error.message });
     }
 };
-// DELETE: Clear ALL bookings for a user
+// UPDATE: Hide cancelled bookings from user view (soft delete)
 exports.clearUserHistory = async (req, res) => {
     try {
         // CHANGED: We now get the ID from the "body", not the URL
         const { userId } = req.body; 
 
-        console.log(`🔥 NUKE COMMAND RECEIVED for user: ${userId}`);
+        console.log(`HIDING CANCELLED BOOKINGS for user: ${userId}`);
 
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
         }
 
-        await Booking.deleteMany({ userId });
+        // Mark cancelled bookings as hidden (soft delete) - they stay in DB for admin
+        const result = await Booking.updateMany({ 
+            userId, 
+            status: 'Cancelled' 
+        }, {
+            $set: { hiddenFromUser: true }
+        });
         
-        res.status(200).json({ message: "History cleared!" });
+        console.log(`Hidden ${result.modifiedCount} cancelled bookings (still in DB for admin)`);
+        res.status(200).json({ 
+            message: `Cleared ${result.modifiedCount} cancelled booking(s) from your view`,
+            hiddenCount: result.modifiedCount
+        });
     } catch (error) {
         console.error("Clear History Error:", error);
         res.status(500).json({ message: "Could not clear history" });
