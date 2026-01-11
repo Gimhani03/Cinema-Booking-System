@@ -33,6 +33,9 @@ const bookingSchema = new mongoose.Schema({
   totalPrice: { type: Number, required: true },
   status: { type: String, default: 'Confirmed' }, 
   
+  // Track if user has hidden this from their view (soft delete)
+  hiddenFromUser: { type: Boolean, default: false },
+  
   // Unique code for the user
   bookingReference: { 
     type: String, 
