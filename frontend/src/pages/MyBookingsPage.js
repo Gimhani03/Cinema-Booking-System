@@ -13,6 +13,9 @@ const MyBookingsPage = () => {
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const userId = user._id || user.id;
 
+console.log('Logged in user:', user);
+console.log('Using userId:', userId);
+
   useEffect(() => {
     const fetchHistory = async () => {
       if (!userId) {
@@ -42,8 +45,13 @@ const userId = user._id || user.id;
     if(!window.confirm("Are you sure you want to cancel this booking?")) return;
     
     try {
-        await axios.delete(`http://localhost:5001/api/bookings/${id}`);
-        setHistory(history.filter(b => b._id !== id));
+        const response = await axios.delete(`http://localhost:5001/api/bookings/${id}`);
+        
+        // Update the booking status to "Cancelled" instead of removing it
+        setHistory(history.map(b => 
+            b._id === id ? { ...b, status: 'Cancelled' } : b
+        ));
+        
         alert("Booking cancelled successfully.");
     } catch (err) {
         console.error("Cancel failed:", err);
@@ -179,11 +187,23 @@ const userId = user._id || user.id;
                         <span style={{color:'#94a3b8'}}>Paid:</span> 
                         <span style={{color: '#00ff88'}}>Rs. {b.totalPrice}</span>
                     </p>
+
+                    <p>
+                        <span style={{color:'#94a3b8'}}>Status:</span> 
+                        <span style={{
+                            color: b.status === 'Cancelled' ? '#ff3333' : '#00ff88',
+                            fontWeight: 'bold'
+                        }}>
+                            {b.status || 'Confirmed'}
+                        </span>
+                    </p>
                   </div>
                   
-                  <button className="cancel-btn-outline" onClick={() => handleCancel(b._id)}>
-                      CANCEL TICKET
-                  </button>
+                  {b.status !== 'Cancelled' && (
+                      <button className="cancel-btn-outline" onClick={() => handleCancel(b._id)}>
+                          CANCEL TICKET
+                      </button>
+                  )}
                 </div>
              ))
           )}
