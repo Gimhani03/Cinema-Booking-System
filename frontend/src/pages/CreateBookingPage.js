@@ -22,13 +22,13 @@ const CreateBookingPage = () => {
 
         try {
             console.log("1. Fetching Showtime for ID:", showtimeId);
+            // Ensure this matches your backend port (5000 or 5001)
             const showtimeRes = await axios.get(`http://localhost:5001/api/showtimes/${showtimeId}`);
             const data = showtimeRes.data;
             
             console.log("2. Showtime Data Received:", data);
 
             // DETECT MOVIE ID (Checks multiple locations)
-            // It might be data.movie, or data.data.movie, or data.showtime.movie
             let rawMovie = data.movie || (data.data && data.data.movie) || (data.showtime && data.showtime.movie);
 
             let movieId = null;
@@ -115,11 +115,44 @@ const CreateBookingPage = () => {
             totalPrice: totalPrice
         };
 
-        await axios.post('http://localhost:5001/api/bookings', payload);
-        navigate('/booking-success');
+        // 1. Create the Booking
+        // Make sure this URL matches your backend port
+        const response = await axios.post('http://localhost:5001/api/bookings', payload, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        console.log("Booking Created Response:", response.data);
+
+        // 2. Extract the new Booking ID (Handles different response structures)
+        // Checks if ID is in 'response.data._id' OR 'response.data.data._id' OR 'response.data.booking._id'
+        const newBookingId = response.data._id || 
+                             (response.data.data && response.data.data._id) || 
+                             (response.data.booking && response.data.booking._id);
+
+        if (newBookingId) {
+            // 3. THIS IS THE FIX: We pass the price and title in the "state" (the backpack)
+            console.log("Redirecting to payment with data...");
+            
+            navigate(`/payment/${newBookingId}`, { 
+                state: { 
+                    passedBooking: {
+                        _id: newBookingId,
+                        totalPrice: totalPrice, // Sending the price we already know!
+                        movie: { title: movieDetails?.title || "Movie Ticket" }
+                    }
+                } 
+            });
+
+        } else {
+            console.error("Could not find Booking ID in response", response.data);
+            alert("Booking created, but could not redirect to payment. Check console.");
+            // Fallback just in case
+            navigate('/booking-success'); 
+        }
+
     } catch (error) {
         console.error("Booking Error:", error);
-        alert("Payment failed.");
+        alert("Booking failed. Please try again.");
         setIsProcessing(false);
     }
   };
@@ -166,7 +199,6 @@ const CreateBookingPage = () => {
             <div className="detail-row">
                 <span className="label">Movie Name</span>
                 <span className="value">
-                    {/* Now this will show the Real Title! */}
                     {movieDetails ? movieDetails.title : "Loading..."}
                 </span>
             </div>

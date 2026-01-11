@@ -142,6 +142,9 @@ const Topbar = () => {
           <MdConfirmationNumber /> My Bookings
         </NavLink>
       )}
+      <NavLink to="/my-payments" onClick={() => setMobileOpen(false)}>
+                    <MdPayments /> My Payments
+                </NavLink>
     </>
   );
 

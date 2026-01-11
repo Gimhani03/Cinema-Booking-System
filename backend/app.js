@@ -20,5 +20,6 @@ app.use('/api/showtimes', showtimeRoutes);
 app.use('/api/halls', hallRoutes);
 app.use('/api/seats', seatRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/payments', require('./routes/paymentRoutes'));
 
 module.exports = app;
