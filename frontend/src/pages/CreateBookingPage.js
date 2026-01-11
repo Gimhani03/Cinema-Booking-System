@@ -13,6 +13,7 @@ const CreateBookingPage = () => {
   const { seats, showtimeId, totalPrice } = bookingData;
 
   const [movieDetails, setMovieDetails] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // --- THE BULLETPROOF MOVIE FETCHER ---
   useEffect(() => {
@@ -35,10 +36,10 @@ const CreateBookingPage = () => {
 
             // ANALYZE WHAT WE FOUND
             if (!rawMovie) {
-                console.error("❌ Could not find 'movie' field in response");
+                console.error("Could not find 'movie' field in response");
             } else if (typeof rawMovie === 'object' && rawMovie.title) {
                 // Case A: We got the full movie object already!
-                console.log("✅ Found Full Movie Object");
+                console.log("Found Full Movie Object");
                 setMovieDetails(rawMovie);
                 return;
             } else if (typeof rawMovie === 'object' && rawMovie._id) {
@@ -71,7 +72,7 @@ const CreateBookingPage = () => {
             }
 
         } catch (err) {
-            console.error("❌ CRITICAL ERROR:", err);
+            console.error("CRITICAL ERROR:", err);
             setMovieDetails({ title: "Network Error" });
         }
     };
@@ -80,6 +81,12 @@ const CreateBookingPage = () => {
   }, [showtimeId]);
 
   const handleConfirmBooking = async () => {
+    // Prevent double submission
+    if (isProcessing) {
+        console.log('Booking already in progress...');
+        return;
+    }
+
     // Check if user is logged in
     const token = localStorage.getItem("token");
     if (!token) {
@@ -98,6 +105,8 @@ const CreateBookingPage = () => {
         return;
     }
 
+    setIsProcessing(true);
+    
     try {
         const payload = {
             userId: userId, 
@@ -111,6 +120,7 @@ const CreateBookingPage = () => {
     } catch (error) {
         console.error("Booking Error:", error);
         alert("Payment failed.");
+        setIsProcessing(false);
     }
   };
 
@@ -178,8 +188,16 @@ const CreateBookingPage = () => {
 
         {/* Confirm Button */}
         <div className="confirm-btn-container">
-            <button onClick={handleConfirmBooking} className="confirm-btn">
-                CONFIRM & PAY NOW
+            <button 
+                onClick={handleConfirmBooking} 
+                className="confirm-btn"
+                disabled={isProcessing}
+                style={{
+                    opacity: isProcessing ? 0.6 : 1,
+                    cursor: isProcessing ? 'not-allowed' : 'pointer'
+                }}
+            >
+                {isProcessing ? 'PROCESSING...' : 'CONFIRM & PAY NOW'}
             </button>
         </div>
 
