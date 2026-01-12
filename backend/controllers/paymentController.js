@@ -1,4 +1,6 @@
 const Payment = require('../models/Payment');
+const Booking = require('../models/Booking'); 
+const sendEmail = require('../utils/emailService');
 
 // @desc    Process a new payment
 // @route   POST /api/payments
@@ -7,6 +9,7 @@ exports.processPayment = async (req, res) => {
     try {
         const { bookingId, amount, paymentMethod, cardLast4 } = req.body;
 
+        // 1. Save the Payment
         const payment = new Payment({
             userId: req.user._id,
             bookingId,
@@ -17,19 +20,71 @@ exports.processPayment = async (req, res) => {
         });
 
         const createdPayment = await payment.save();
+
+        // 2. Fetch Booking Details safely
+        const fullBooking = await Booking.findById(bookingId)
+            .populate({
+                path: 'showtimeId',
+                populate: { path: 'movie', select: 'title' }
+            });
+
+        // 3. Send the Confirmation Email (Now Crash-Proof!)
+        if (fullBooking) {
+            // SAFEGUARDS: We check if data exists before using it to prevent crashes
+            const movieTitle = fullBooking.showtimeId?.movie?.title || "Movie Ticket";
+            
+            // This is the line that was crashing. Now we check if seats exist first.
+            const seatList = (fullBooking.seats && fullBooking.seats.length > 0) 
+                ? fullBooking.seats.join(', ') 
+                : 'General Admission';
+
+            const message = `
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #fbbf24;">Payment Confirmation</h2>
+                    <p>Hi <strong>${req.user.name}</strong>,</p>
+                    <p>Your booking for <strong>${movieTitle}</strong> is confirmed!</p>
+                    
+                    <div style="background: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <p><strong>Seats:</strong> ${seatList}</p>
+                        <p><strong>Amount:</strong> Rs. ${amount.toLocaleString()}</p>
+                        <p><strong>Ref:</strong> ${createdPayment._id}</p>
+                    </div>
+
+                    <p>Enjoy the movie!<br/>Cinema Booking Team</p>
+                </div>
+            `;
+
+            try {
+                await sendEmail({
+                    email: req.user.email,
+                    subject: `Booking Confirmed: ${movieTitle}`,
+                    html: message
+                });
+                console.log("Email sent successfully to:", req.user.email);
+            } catch (emailError) {
+                console.error("Email failed to send:", emailError);
+            }
+        }
+
         res.status(201).json(createdPayment);
+
     } catch (error) {
-        console.error(error);
+        console.error("Payment Error:", error);
         res.status(500).json({ message: 'Payment processing failed', error: error.message });
     }
 };
 
 // @desc    Get user's own payment history
-// @route   GET /api/payments/my-payments
-// @access  Private
 exports.getMyPayments = async (req, res) => {
     try {
-        const payments = await Payment.find({ userId: req.user.id }).sort({ createdAt: -1 });
+        const payments = await Payment.find({ userId: req.user.id }).sort({ createdAt: -1 })
+            .populate({
+                path: 'bookingId',
+                populate: {
+                    path: 'showtimeId',
+                    populate: { path: 'movie', select: 'title' }
+                }
+            });
         res.status(200).json(payments);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching payments' });
@@ -37,8 +92,6 @@ exports.getMyPayments = async (req, res) => {
 };
 
 // @desc    Get ALL payments (Admin only)
-// @route   GET /api/payments
-// @access  Private/Admin
 exports.getAllPayments = async (req, res) => {
     try {
         const payments = await Payment.find()
@@ -54,8 +107,6 @@ exports.getAllPayments = async (req, res) => {
 };
 
 // @desc    Delete ALL payments (Admin only)
-// @route   DELETE /api/payments
-// @access  Private/Admin
 exports.deleteAllPayments = async (req, res) => {
     try {
         await Payment.deleteMany({});
@@ -67,8 +118,6 @@ exports.deleteAllPayments = async (req, res) => {
 };
 
 // @desc    Delete Only My Payments (User Side)
-// @route   DELETE /api/payments/my-payments
-// @access  Private
 exports.deleteMyPayments = async (req, res) => {
     try {
         await Payment.deleteMany({ userId: req.user._id });
