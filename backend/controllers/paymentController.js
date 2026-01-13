@@ -73,8 +73,7 @@ exports.processPayment = async (req, res) => {
             .populate({
                 path: 'showtimeId',
                 populate: { path: 'movie', select: 'title' }
-            })
-            .populate('seatIds'); // FIX: Populate seatIds
+            });
 
         if (fullBooking) {
             const movieTitle = fullBooking.showtimeId?.movie?.title || "Movie Ticket";
