@@ -67,13 +67,24 @@ describe('Booking API Integration Tests', () => {
         expect([201, 400]).toContain(response.statusCode);
     });
 
-    it('POST /api/bookings - should fail if data is missing', async () => {
+    it('POST /api/bookings - should fail if required fields are missing', async () => {
+        // Create a valid user to get a proper ObjectId
+        const fakeUser = await User.create({
+            name: 'Incomplete Test',
+            email: 'incomplete@example.com',
+            password: 'password123'
+        });
+        
+         // Send request with valid userId but missing required fields
         const response = await request(app)
             .post('/api/bookings')
             .send({
-                userId: "user_123"
+                userId: fakeUser._id
+                // Missing: showtimeId, seatIds, totalPrice (all required)
             });
 
-        expect(response.statusCode).not.toBe(201);
+        // Should return error status (400 or 500)
+        expect([400, 500]).toContain(response.statusCode);
+        expect(response.body).toHaveProperty('message');
     });
 });
