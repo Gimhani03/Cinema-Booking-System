@@ -302,7 +302,7 @@ const AdminBookings = () => {
                 <tr key={booking._id}>
                   <td className="ref-cell">
                     <span className="booking-ref">
-                      #{booking.bookingReference || booking._id.slice(-6).toUpperCase()}
+                      #{booking._id.slice(-6).toUpperCase()}
                     </span>
                   </td>
                   <td>
@@ -386,7 +386,7 @@ const AdminBookings = () => {
               <div className="detail-row">
                 <label>Booking Reference:</label>
                 <span className="booking-ref-large">
-                  #{selectedBooking.bookingReference || selectedBooking._id.slice(-6).toUpperCase()}
+                  #{selectedBooking._id.slice(-6).toUpperCase()}
                 </span>
               </div>
               <div className="detail-row">
