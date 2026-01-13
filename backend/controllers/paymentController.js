@@ -1,6 +1,7 @@
 const Payment = require('../models/Payment');
 const Booking = require('../models/Booking'); 
 const Showtime = require('../models/Showtime'); // <--- 1. IMPORT SHOWTIME MODEL
+const Seat = require('../models/Seat'); // Import Seat model
 const sendEmail = require('../utils/emailService');
 
 // @desc    Create Booking AND Process Payment together
@@ -21,11 +22,21 @@ exports.processPayment = async (req, res) => {
                 return res.status(400).json({ message: "Missing booking details (showtimeId or seats)." });
             }
 
+            // Fetch actual seat details to store permanently
+            const seatObjects = await Seat.find({ _id: { $in: seats } });
+            const seatDetails = seatObjects.map(s => ({
+                row: s.row,
+                number: s.number,
+                price: s.price,
+                seatId: s._id
+            }));
+
             // A. Create the Booking Receipt
             const newBooking = new Booking({
                 userId: req.user._id,
                 showtimeId,
-                seats, 
+                seatIds: seats,  // FIX: Use seatIds instead of seats
+                seatDetails,     // FIX: Store seat details permanently
                 totalPrice: amount,
                 status: 'Confirmed' 
             });
@@ -62,16 +73,18 @@ exports.processPayment = async (req, res) => {
             .populate({
                 path: 'showtimeId',
                 populate: { path: 'movie', select: 'title' }
-            });
+            })
+            .populate('seatIds'); // FIX: Populate seatIds
 
         if (fullBooking) {
             const movieTitle = fullBooking.showtimeId?.movie?.title || "Movie Ticket";
             
-            // Handle seats display
+            // Handle seats display - use seatDetails first, then seatIds
             let seatDisplay = "General";
-            if (Array.isArray(fullBooking.seats)) {
-                // If seats are objects, try to show row/number, otherwise show the string
-                seatDisplay = fullBooking.seats.map(s => 
+            if (fullBooking.seatDetails && fullBooking.seatDetails.length > 0) {
+                seatDisplay = fullBooking.seatDetails.map(s => `${s.row}${s.number}`).join(', ');
+            } else if (fullBooking.seatIds && fullBooking.seatIds.length > 0) {
+                seatDisplay = fullBooking.seatIds.map(s => 
                     (typeof s === 'object' && s.row) ? `${s.row}${s.number}` : s
                 ).join(', ');
             }
