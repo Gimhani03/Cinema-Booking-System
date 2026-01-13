@@ -25,54 +25,41 @@ const CreateBookingPage = () => {
             const showtimeRes = await axios.get(`http://localhost:5001/api/showtimes/${showtimeId}`);
             const data = showtimeRes.data;
             
-            console.log("2. Showtime Data Received:", data);
-
-            // DETECT MOVIE ID (Checks multiple locations)
-            // It might be data.movie, or data.data.movie, or data.showtime.movie
+            // DETECT MOVIE ID
             let rawMovie = data.movie || (data.data && data.data.movie) || (data.showtime && data.showtime.movie);
 
             let movieId = null;
             let movieTitle = null;
 
-            // ANALYZE WHAT WE FOUND
             if (!rawMovie) {
                 console.error("Could not find 'movie' field in response");
             } else if (typeof rawMovie === 'object' && rawMovie.title) {
-                // Case A: We got the full movie object already!
-                console.log("Found Full Movie Object");
                 setMovieDetails(rawMovie);
                 return;
             } else if (typeof rawMovie === 'object' && rawMovie._id) {
-                // Case B: We got an object, but need to extract the ID
                 movieId = rawMovie._id;
             } else {
-                // Case C: It's just a String ID (Most Common)
                 movieId = rawMovie;
             }
 
-            // STEP 3: FETCH MOVIE DETAILS (If we only have an ID)
+            // FETCH MOVIE DETAILS
             if (movieId) {
-                console.log("3. Fetching Movie Details for ID:", movieId);
                 const movieRes = await axios.get(`http://localhost:5001/api/movies/${movieId}`);
-                
-                // Hunt for the title in the second response
                 const mData = movieRes.data;
-                console.log("4. Movie API Response:", mData);
-
-                // Check common spots for title
+                
                 movieTitle = mData.title || (mData.movie && mData.movie.title) || (mData.data && mData.data.title);
                 
                 if (movieTitle) {
                     setMovieDetails({ title: movieTitle });
                 } else {
-                    setMovieDetails({ title: "Title Not Found in API" });
+                    setMovieDetails({ title: "Title Not Found" });
                 }
             } else {
                 setMovieDetails({ title: "Movie ID Missing" });
             }
 
         } catch (err) {
-            console.error("CRITICAL ERROR:", err);
+            console.error("Error fetching movie:", err);
             setMovieDetails({ title: "Network Error" });
         }
     };
@@ -81,13 +68,10 @@ const CreateBookingPage = () => {
   }, [showtimeId]);
 
   const handleConfirmBooking = async () => {
-    // Prevent double submission
-    if (isProcessing) {
-        console.log('Booking already in progress...');
-        return;
-    }
+    // Prevent double clicking
+    if (isProcessing) return;
 
-    // Check if user is logged in
+    // Check login
     const token = localStorage.getItem("token");
     if (!token) {
         alert("Please login to complete booking!");
@@ -95,31 +79,33 @@ const CreateBookingPage = () => {
         return;
     }
 
-     // Get actual user ID
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const userId = user._id || user.id;
-    
-    if (!userId) {
-        alert("User information missing. Please login again.");
-        navigate('/login');
-        return;
-    }
-
     setIsProcessing(true);
     
     try {
-        const payload = {
-            userId: userId, 
-            showtimeId: showtimeId,
-            seatIds: seats.map(s => s._id),
-            totalPrice: totalPrice
-        };
+        // --- THE BIG CHANGE ---
+        // We do NOT save to the database here anymore.
+        // We just pass the data to the Payment Page.
+        
+        console.log("Redirecting to payment with data...");
 
-        await axios.post('http://localhost:5001/api/bookings', payload);
-        navigate('/booking-success');
+        // We format the seats nicely (e.g., "A1", "B2") so they look good in the email later
+        const formattedSeats = seats ? seats.map(s => `${s.row}${s.number}`) : [];
+
+        // Navigate to Payment Page
+        // Note: We use '/payment/checkout' as a placeholder ID. 
+        // The Payment Page will ignore the ID and use the 'state' instead.
+        navigate(`/payment/checkout`, { 
+            state: { 
+                showtimeId: showtimeId,
+                selectedSeats: formattedSeats, // Passing "A1, A2"
+                totalPrice: totalPrice,
+                movieTitle: movieDetails?.title || "Movie Ticket"
+            } 
+        });
+
     } catch (error) {
-        console.error("Booking Error:", error);
-        alert("Payment failed.");
+        console.error("Navigation Error:", error);
+        alert("Something went wrong. Please try again.");
         setIsProcessing(false);
     }
   };
@@ -129,49 +115,26 @@ const CreateBookingPage = () => {
       <button 
         onClick={() => navigate(-1)} 
         style={{
-          position: 'absolute',
-          left: '20px',
-          top: '20px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: 'white',
-          padding: '10px 15px',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          transition: 'all 0.3s ease',
+          position: 'absolute', left: '20px', top: '20px',
+          background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)',
+          color: 'white', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer',
           zIndex: 10
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.background = 'rgba(255, 61, 0, 0.2)';
-          e.currentTarget.style.borderColor = '#ff3d00';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
         }}
       >
         <FaArrowLeft />
       </button>
+
       <div className="booking-card">
-        
-        {/* Title */}
         <h1>CONFIRM BOOKING</h1>
         
         <div className="summary-details">
-            {/* Movie Name Row */}
             <div className="detail-row">
                 <span className="label">Movie Name</span>
                 <span className="value">
-                    {/* Now this will show the Real Title! */}
                     {movieDetails ? movieDetails.title : "Loading..."}
                 </span>
             </div>
 
-            {/* Seats Row */}
             <div className="detail-row">
                 <span className="label">Selected Seats</span>
                 <span className="value">
@@ -180,22 +143,17 @@ const CreateBookingPage = () => {
             </div>
         </div>
 
-        {/* Price Section */}
         <div className="price-section">
             <span className="price-label">Total Amount</span>
             <span className="price-amount">Rs. {totalPrice || 0}</span>
         </div>
 
-        {/* Confirm Button */}
         <div className="confirm-btn-container">
             <button 
                 onClick={handleConfirmBooking} 
                 className="confirm-btn"
                 disabled={isProcessing}
-                style={{
-                    opacity: isProcessing ? 0.6 : 1,
-                    cursor: isProcessing ? 'not-allowed' : 'pointer'
-                }}
+                style={{ opacity: isProcessing ? 0.6 : 1 }}
             >
                 {isProcessing ? 'PROCESSING...' : 'CONFIRM & PAY NOW'}
             </button>

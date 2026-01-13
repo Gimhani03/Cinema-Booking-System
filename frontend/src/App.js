@@ -29,6 +29,9 @@ import BookingSuccess from './pages/BookingSuccess';
 import CreateBookingPage from './pages/CreateBookingPage';
 import MyBookingPage from './pages/MyBookingsPage';
 import './pages/Booking.css';
+import PaymentPage from './pages/PaymentPage';
+import AdminPayments from './pages/admin/AdminPayments';
+import PaymentHistory from './pages/PaymentHistory';
 
 function App() {
   const role = localStorage.getItem("role"); 
@@ -208,6 +211,13 @@ function App() {
            <HallManager />
            } 
            />
+           <Route path="/payment/:bookingId" 
+           element={
+           <PaymentPage />} 
+           />
+           <Route path="/payments" element={<AdminPayments />} />
+
+           <Route path="/my-payments" element={<PaymentHistory />} />
           
         </Routes>
       </Router>

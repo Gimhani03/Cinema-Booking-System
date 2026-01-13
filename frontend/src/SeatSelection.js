@@ -19,6 +19,8 @@ const SeatSelection = () => {
     const fetchSeats = async () => {
       try {
         const res = await axios.get(`http://localhost:5001/api/seats/${showtimeId}`);
+        // DEBUG: Look in your browser console (F12) to see exactly what "status" the DB sends
+        console.log("Seats Data from API:", res.data); 
         setSeats(res.data);
       } catch (err) {
         console.error("Error fetching seats:", err);
@@ -31,7 +33,14 @@ const SeatSelection = () => {
 
   // 2. Handle Clicking a Seat (Toggle Selection)
   const handleSeatClick = (seat) => {
-    if (seat.status === 'booked' || seat.status === 'locked') return;
+    // We also use the helper function here to prevent clicking booked seats
+    const isBooked = 
+        (seat.status && seat.status.toLowerCase() === 'booked') || 
+        seat.isBooked === true || 
+        seat.booked === true ||
+        seat.status === 'locked';
+
+    if (isBooked) return;
     
     if (selectedSeatIds.includes(seat._id)) {
       setSelectedSeatIds(selectedSeatIds.filter(id => id !== seat._id));
@@ -44,7 +53,7 @@ const SeatSelection = () => {
   const selectedSeats = seats.filter(seat => selectedSeatIds.includes(seat._id));
   const totalPrice = selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0);
 
-  // 3. Handle Payment (UPDATED: Redirects to Create Booking Form)
+  // 3. Handle Payment (Redirects to Create Booking Form)
   const handlePayment = () => {
     if (selectedSeatIds.length === 0) {
         alert("Please select at least one seat!");
@@ -59,8 +68,6 @@ const SeatSelection = () => {
         return;
     }
 
-    // INSTEAD of booking immediately, we move to the Form Page
-    // We pass the data (seats, price) so the form knows what you picked
     navigate('/create-booking', { 
         state: { 
             seats: selectedSeats, 
@@ -150,7 +157,13 @@ const SeatSelection = () => {
                     }
 
                     const isSelected = selectedSeatIds.includes(seat._id);
-                    const isBooked = seat.status === 'booked' || seat.status === 'locked';
+                    
+                    // --- FIX IS HERE: More robust check for "booked" status ---
+                    const isBooked = 
+                        (seat.status && seat.status.toLowerCase() === 'booked') || 
+                        seat.isBooked === true || 
+                        seat.booked === true ||
+                        seat.status === 'locked';
                     
                     return (
                         <div 
@@ -180,7 +193,6 @@ const SeatSelection = () => {
                 <button className="btn-cancel" onClick={() => navigate('/')}>
                     CANCEL
                 </button>
-                {/* 4. This now goes to the Form Page */}
                 <button className="btn-pay" onClick={handlePayment}>
                     PAY NOW
                 </button>
