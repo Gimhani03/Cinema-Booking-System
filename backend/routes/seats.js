@@ -63,11 +63,10 @@ router.get('/:showtimeId', async (req, res) => {
     }
 });
 
-// 3. (NEW) BULK BOOK SEATS - CALL THIS AFTER PAYMENT
-// This was likely the missing link.
+// 3. (NEW) BULK BOOK SEATS
 router.post('/book-seats', async (req, res) => {
     try {
-        const { seatIds } = req.body; // Expects array: ["id1", "id2"]
+        const { seatIds } = req.body; 
 
         if (!seatIds || seatIds.length === 0) {
             return res.status(400).json({ error: "No seats provided" });
@@ -115,7 +114,6 @@ async function generateSeats(showtime, hall) {
     hall.seatLayout.forEach((rowArr, rIndex) => {
         const currentRowLabel = rowLabels[rIndex]; 
         rowArr.forEach((status, cIndex) => {
-            // Using '==' allows string "1" or number 1 to work
             if (status == 1) { 
                 seats.push({
                     showtimeId: showtime._id,
