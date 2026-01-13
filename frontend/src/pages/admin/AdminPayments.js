@@ -26,7 +26,8 @@ const AdminPayments = () => {
             const token = localStorage.getItem('token');
             
             // Add timestamp to force fresh data
-            const res = await axios.get(`http://localhost:5001/api/payments?t=${new Date().getTime()}`, {
+            // Added '/all' to match the backend route
+            const res = await axios.get(`http://localhost:5001/api/payments/all?t=${new Date().getTime()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
