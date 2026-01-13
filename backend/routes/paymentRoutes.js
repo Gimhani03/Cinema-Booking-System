@@ -1,25 +1,24 @@
 const express = require('express');
 const router = express.Router();
 
-// --- 1. IMPORT THE FUNCTIONS ---
-// IMPORTANT: We added 'deleteMyPayments' to this list!
+// 1. IMPORT FUNCTIONS
 const { 
     processPayment, 
     getMyPayments, 
     getAllPayments,
-    deleteAllPayments,
-    deleteMyPayments // <--- THIS WAS MISSING!
+    deleteMyPayments 
 } = require('../controllers/paymentController');
 
-const { protect } = require('../middlewares/authMiddleware');
+// 2. IMPORT MIDDLEWARE
+// CORRECTED: Pointing to 'authMiddleware' instead of 'auth'
+const { protect } = require('../middlewares/authMiddleware'); 
 
-// --- 2. USER ROUTES ---
-router.post('/', protect, processPayment);
-router.get('/my-payments', protect, getMyPayments);
-router.delete('/my-payments', protect, deleteMyPayments); 
+// --- USER ROUTES ---
+router.post('/', protect, processPayment);           // Pay & Book
+router.get('/my-payments', protect, getMyPayments);  // History
+router.delete('/my-payments', protect, deleteMyPayments); // Clear History
 
-// --- 3. ADMIN ROUTES ---
-router.get('/', protect, getAllPayments);
-router.delete('/', protect, deleteAllPayments);
+// --- ADMIN ROUTES ---
+router.get('/all', protect, getAllPayments);         // See all payments
 
 module.exports = router;

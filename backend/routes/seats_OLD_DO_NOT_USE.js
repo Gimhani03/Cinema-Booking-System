@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Seat = require('../models/Seat');
-const Hall = require('../models/Hall');         // Member 4's Hall Model
-const Showtime = require('../models/Showtime'); // Member 4's Showtime Model
+const Hall = require('../models/Hall');         
+const Showtime = require('../models/Showtime'); 
 
 // 1. SMART GENERATE (Manual Trigger)
-// Useful if Admin wants to force-regenerate seats
 router.post('/generate', async (req, res) => {
     try {
         const { showtimeId } = req.body;
@@ -37,26 +36,24 @@ router.get('/:showtimeId', async (req, res) => {
         let seats = await Seat.find({ showtimeId });
 
         if (seats.length > 0) {
-            return res.json(seats); // Seats exist? Great, send them!
+            return res.json(seats); 
         }
 
         // --- SELF-FIX LOGIC ---
-        // If no seats found, we generate them automatically right now.
         console.log(`No seats found for ${showtimeId}. Auto-generating...`);
 
         const showtime = await Showtime.findById(showtimeId);
         if (!showtime) return res.status(404).json({ error: "Showtime not found" });
 
         const hall = await Hall.findById(showtime.hall);
-        if (!hall || !hall.seatLayout) return res.json([]); // Can't generate
+        if (!hall || !hall.seatLayout) return res.json([]); 
 
-        // Generate the array using helper function
         const newSeats = await generateSeats(showtime, hall);
 
         if (newSeats.length > 0) {
             await Seat.insertMany(newSeats);
             console.log(`Auto-generated ${newSeats.length} seats.`);
-            return res.json(newSeats); // Send the brand new seats!
+            return res.json(newSeats); 
         } else {
             return res.json([]);
         }
@@ -66,7 +63,30 @@ router.get('/:showtimeId', async (req, res) => {
     }
 });
 
-// 3. UPDATE SEAT (Booking/Locking)
+// 3. (NEW) BULK BOOK SEATS - CALL THIS AFTER PAYMENT
+// This was likely the missing link.
+router.post('/book-seats', async (req, res) => {
+    try {
+        const { seatIds } = req.body; // Expects array: ["id1", "id2"]
+
+        if (!seatIds || seatIds.length === 0) {
+            return res.status(400).json({ error: "No seats provided" });
+        }
+
+        // Update all matching seats to status: 'booked'
+        await Seat.updateMany(
+            { _id: { $in: seatIds } },
+            { $set: { status: 'booked' } }
+        );
+
+        res.json({ success: true, message: "Seats marked as booked" });
+    } catch (err) {
+        console.error("Booking Error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 4. UPDATE SINGLE SEAT (Legacy/Admin)
 router.put('/:id', async (req, res) => {
     try {
         const { status } = req.body;
@@ -77,7 +97,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// 4. RESET (Helper to clear seats)
+// 5. RESET (Helper)
 router.delete('/reset', async (req, res) => {
     try {
         await Seat.deleteMany({});
@@ -87,7 +107,7 @@ router.delete('/reset', async (req, res) => {
     }
 });
 
-// HELPER FUNCTION (Shared logic)
+// HELPER FUNCTION
 async function generateSeats(showtime, hall) {
     const seats = [];
     const rowLabels = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
@@ -95,7 +115,8 @@ async function generateSeats(showtime, hall) {
     hall.seatLayout.forEach((rowArr, rIndex) => {
         const currentRowLabel = rowLabels[rIndex]; 
         rowArr.forEach((status, cIndex) => {
-            if (status === 1) { 
+            // Using '==' allows string "1" or number 1 to work
+            if (status == 1) { 
                 seats.push({
                     showtimeId: showtime._id,
                     row: currentRowLabel,

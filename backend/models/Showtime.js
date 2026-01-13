@@ -22,6 +22,12 @@ const showtimeSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true
+  },
+  // --- THIS WAS MISSING ---
+  // We need this array to store seats like ["A1", "A2"]
+  bookedSeats: {
+    type: [String], // Array of Seat Numbers
+    default: []     // Starts empty
   }
 }, { timestamps: true });
 
