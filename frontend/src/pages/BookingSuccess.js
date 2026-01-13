@@ -58,7 +58,13 @@ const BookingSuccess = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+        <div style={{ 
+            display: 'flex', 
+            gap: '20px', 
+            marginTop: '30px',
+            justifyContent: 'center',
+            alignItems: 'center'
+        }}>
             <button 
                 className="confirm-btn" 
                 style={{ minWidth: '200px' }}
@@ -68,7 +74,8 @@ const BookingSuccess = () => {
             </button>
             
             <button 
-                className="history-btn" 
+                className="history-btn"
+                style={{ minWidth: '200px' }}
                 onClick={() => navigate('/my-bookings')}
             >
                 VIEW MY BOOKINGS
