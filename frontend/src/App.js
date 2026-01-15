@@ -246,9 +246,7 @@ function App() {
            <Route path="/payments" 
              element={
                <ProtectedRoute roleRequired="admin">
-                 <PageLayout isAdmin={true}>
                    <AdminPayments />
-                 </PageLayout>
                </ProtectedRoute>
              } 
            />
