@@ -36,7 +36,7 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5001/api/notifications", {
+      const res = await axios.get("http://localhost:5001/api/notifications/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications(res.data);
