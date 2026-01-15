@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Seat = require('../models/Seat'); 
+const Notification = require('../models/Notification'); // <--- Added for Pop-ups
 
 // Get ALL bookings (Admin)
 exports.getAllBookings = async (req, res) => {
@@ -79,6 +80,26 @@ exports.createBooking = async (req, res) => {
             { $set: { status: 'booked' } }
         );
 
+        // --- NEW: NOTIFICATION LOGIC (Added to Old Code) ---
+        // 1. Save to DB
+        const message = `Booking Confirmed! Your Booking ID is ${newBooking._id}`;
+        const notification = await Notification.create({
+            userId: userId, 
+            message: message
+        });
+
+        // 2. Send Real-Time Popup
+        const io = req.app.get('io');
+        const onlineUsers = req.app.get('onlineUsers');
+        const strUserId = String(userId);
+
+        if (onlineUsers && onlineUsers.has(strUserId)) {
+            const socketId = onlineUsers.get(strUserId);
+            io.to(socketId).emit('receive_notification', notification);
+            console.log(`🔔 Notification SENT to Socket ${socketId}`);
+        }
+        // ---------------------------------------------------
+
         console.log("SUCCESS: Booking Created!");
         res.status(201).json({ message: "Booking successful!", booking: newBooking });
     } catch (error) {
@@ -103,7 +124,7 @@ exports.getUserBookings = async (req, res) => {
                 populate: { path: 'movie' }   
             })
             .populate('seatIds')      // <--- CHANGED from 'seats' to 'seatIds'
-            .sort({ createdAt: -1 });         
+            .sort({ createdAt: -1 });        
 
         console.log(`FOUND ${bookings.length} VISIBLE BOOKINGS.`);
         res.json(bookings);
@@ -133,6 +154,27 @@ exports.cancelBooking = async (req, res) => {
             { _id: { $in: bookingToCancel.seatIds } },
             { $set: { status: 'available' } }
         );
+
+        // 1. Create Notification
+        const message = `Booking Cancelled. Your seats have been unlocked and refunded. (ID: ${bookingToCancel._id})`;
+        const notification = new Notification({
+            userId: bookingToCancel.userId,
+            message: message,
+            isRead: false
+        });
+        await notification.save();
+
+        // 2. Send Real-Time Popup
+        const io = req.app.get('io');
+        const onlineUsers = req.app.get('onlineUsers');
+        const strUserId = String(bookingToCancel.userId);
+
+        if (onlineUsers && onlineUsers.has(strUserId)) {
+            const socketId = onlineUsers.get(strUserId);
+            io.to(socketId).emit('receive_notification', notification);
+            console.log(`🔔 SENT POPUP to User ${strUserId}`);
+        }
+        // ---------------------------------------------------
 
         res.json({ message: "Booking cancelled successfully", booking: bookingToCancel });
     } catch (error) {

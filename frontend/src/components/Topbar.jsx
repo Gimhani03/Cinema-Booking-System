@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { io } from "socket.io-client";
+import { toast } from 'react-toastify';
 import {
   MdMovie,
   MdMenu,
   MdNotifications,
-  MdEventSeat,
   MdSchedule,
   MdTheaters,
   MdPayments,
@@ -27,6 +29,7 @@ const Topbar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [notFound, setNotFound] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,6 +43,56 @@ const Topbar = () => {
     setIsAuthenticated(!!token);
   }, [location]);
 
+  // 2. Fetch Notification Count (New)
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await axios.get("http://localhost:5001/api/notifications/unread-count", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUnreadCount(res.data.count);
+      } catch (error) {
+        // Silent error handling
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Poll every 30s to keep sync
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, location.pathname]); 
+
+  // 3. Socket Connection (New)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const userId = user ? (user.id || user._id) : null; 
+
+    // Stop if no valid user ID
+    if (!token || !userId) return; 
+
+    const socket = io("http://localhost:5001");
+
+    socket.on("connect", () => {
+        socket.emit("register", userId);
+    });
+
+    socket.on("receive_notification", (newNotif) => {
+      setUnreadCount((prev) => prev + 1);
+      toast.info(`🔔 ${newNotif.message}`);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [isAuthenticated]);
+
+  // 4. Click Outside Logic (Old)
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -116,7 +169,7 @@ const Topbar = () => {
       <NavLink to="/admin/halls" onClick={() => setMobileOpen(false)}>
         <MdTheaters /> Halls
       </NavLink>
-    
+
       <NavLink to="/admin/bookings" onClick={() => setMobileOpen(false)}>
         <MdConfirmationNumber /> Bookings
       </NavLink>
@@ -143,8 +196,8 @@ const Topbar = () => {
         </NavLink>
       )}
       <NavLink to="/my-payments" onClick={() => setMobileOpen(false)}>
-                    <MdPayments /> My Payments
-                </NavLink>
+        <MdPayments /> My Payments
+      </NavLink>
     </>
   );
 
@@ -153,7 +206,7 @@ const Topbar = () => {
   return (
     <nav className="topbar">
       <div className="logo">
-        <NavLink to="/home" onClick={() => setMobileOpen(false)}>
+        <NavLink to="/home" onClick={(e) => { e.stopPropagation(); setMobileOpen(false); }}>
           <MdMovie size={26} /> Cinema Booking
         </NavLink>
       </div>
@@ -176,6 +229,8 @@ const Topbar = () => {
                 onClick={() => setMobileOpen(false)}
               >
                 <MdNotifications /> Notifications
+                {/* Mobile Badge */}
+                {unreadCount > 0 && <span style={{marginLeft:'5px', color:'red'}}>({unreadCount})</span>}
               </NavLink>
             )}
 
@@ -236,7 +291,10 @@ const Topbar = () => {
             style={{ color: isNotificationsPage ? "#ff3d00" : "#fff" }}
           >
             <MdNotifications size={22} />
-            <span className="badge">3</span>
+            {/* --- Desktop Badge --- */}
+            {unreadCount > 0 && (
+                <span className="badge">{unreadCount}</span>
+            )}
           </NavLink>
         )}
 

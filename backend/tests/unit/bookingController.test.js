@@ -1,12 +1,14 @@
 const bookingController = require('../../controllers/bookingController');
 const Booking = require('../../models/Booking');
 const Seat = require('../../models/Seat');
+const Notification = require ('../../models/Notification');
 const httpMocks = require('node-mocks-http');
 const mongoose = require('mongoose');
 
 // Mock the models
 jest.mock('../../models/Booking');
 jest.mock('../../models/Seat');
+jest.mock('../../models/Notification');
 
 describe('Booking Controller Unit Tests', () => {
     let req, res;
@@ -15,6 +17,22 @@ describe('Booking Controller Unit Tests', () => {
     beforeEach(() => {
         req = httpMocks.createRequest();
         res = httpMocks.createResponse();
+        // Mock the app object for Socket.IO dependencies
+        req.app = {
+            get: jest.fn((key) => {
+                if (key === 'io') {
+                    return {
+                        to: jest.fn().mockReturnThis(),
+                        emit: jest.fn()
+                    };
+                }
+                if (key === 'onlineUsers') {
+                    return new Map();
+                }
+                return null;
+            })
+        };
+
         jest.clearAllMocks();
         
         // Generate valid MongoDB ObjectIds for testing
@@ -50,6 +68,13 @@ describe('Booking Controller Unit Tests', () => {
 
         // Mock seat update
         Seat.updateMany.mockResolvedValue({});
+
+            // Mock Notification creation
+            Notification.create.mockResolvedValue({
+                _id: 'notification_123',
+                userId: req.body.userId,
+                message: `Booking Confirmed! Your Booking ID is booking_123`
+            });
 
         await bookingController.createBooking(req, res);
 

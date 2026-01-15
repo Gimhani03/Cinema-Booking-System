@@ -32,6 +32,11 @@ import './pages/Booking.css';
 import PaymentPage from './pages/PaymentPage';
 import AdminPayments from './pages/admin/AdminPayments';
 import PaymentHistory from './pages/PaymentHistory';
+import Notifications from "./pages/customers/Notifications";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
+import './ToastStyles.css';
 
 function App() {
   const role = localStorage.getItem("role"); 
@@ -39,6 +44,20 @@ function App() {
   return (
     <SearchProvider>
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        
+        {/* --- Notification Popup Container --- */}
+        <ToastContainer 
+          position="top-right"
+          autoClose={4000}
+          theme="dark"
+          newestOnTop={true}
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          style={{ zIndex: 99999999, fontSize: '16px' }} 
+        />
+
         <Routes>
           <Route
             path="/"
@@ -135,7 +154,7 @@ function App() {
           <Route path="/booking/:showtimeId" element={<SeatSelection />} />
           <Route path="/create-booking" element={<CreateBookingPage />} />
           <Route path="/booking-success" element={<BookingSuccess />} />
-          <Route path="/my-bookings" element={<MyBookingPage />} />
+          <Route path="/my-bookings" element={<ProtectedRoute><MyBookingPage /></ProtectedRoute>} />
           
           <Route
             path="/profile"
@@ -207,17 +226,52 @@ function App() {
             } 
           />
           <Route path="/admin/halls"
-           element={
-           <HallManager />
-           } 
+            element={
+              <ProtectedRoute roleRequired="admin">
+                <PageLayout isAdmin={true}>
+                   <HallManager />
+                </PageLayout>
+              </ProtectedRoute>
+            } 
            />
            <Route path="/payment/:bookingId" 
-           element={
-           <PaymentPage />} 
+            element={
+              <ProtectedRoute>
+                <PageLayout>
+                   <PaymentPage />
+                </PageLayout>
+              </ProtectedRoute>
+            } 
            />
-           <Route path="/payments" element={<AdminPayments />} />
+           <Route path="/payments" 
+             element={
+               <ProtectedRoute roleRequired="admin">
+                 <PageLayout isAdmin={true}>
+                   <AdminPayments />
+                 </PageLayout>
+               </ProtectedRoute>
+             } 
+           />
 
-           <Route path="/my-payments" element={<PaymentHistory />} />
+           <Route path="/my-payments" 
+             element={
+               <ProtectedRoute>
+                 <PaymentHistory />
+               </ProtectedRoute>
+             } 
+           />
+
+           {/* --- NEW ROUTE (Added at end to preserve order) --- */}
+           <Route 
+             path="/notifications" 
+             element={
+               <ProtectedRoute>
+                 <PageLayout>
+                   <Notifications />
+                 </PageLayout>
+               </ProtectedRoute>
+             } 
+           />
           
         </Routes>
       </Router>
