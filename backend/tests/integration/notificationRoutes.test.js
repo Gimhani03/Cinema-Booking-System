@@ -1,22 +1,26 @@
-require("dotenv").config({ path: "backend/.env" });
-
 const request = require("supertest");
 const mongoose = require("mongoose");
+const {MongoMemoryServer} = require("mongodb-memory-server");
 const app = require("../../app");
 
 const User = require("../../models/User");
 const Notification = require("../../models/Notification");
 
+let mongoServer;
 let token;
 let userId;
 let notificationId;
 
 // ⏱ Increase timeout for integration tests
-jest.setTimeout(15000);
+jest.setTimeout(60000);
 
 beforeAll(async () => {
-  // ✅ CONNECT TO DATABASE
-  await mongoose.connect(process.env.MONGODB_URI);
+  // ✅ CONNECT TO IN-MEMORY DATABASE
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+
+  await mongoose.disconnect();
+  await mongoose.connect(uri);
 
   // Clean test data
   await User.deleteMany({});
@@ -54,6 +58,7 @@ afterAll(async () => {
   await User.deleteMany({});
   await Notification.deleteMany({});
   await mongoose.connection.close();
+  await mongoServer.stop();
 });
 
 describe("🔔 Notification Integration Tests", () => {
