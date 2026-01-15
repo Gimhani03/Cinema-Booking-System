@@ -3,6 +3,7 @@ const Booking = require('../models/Booking');
 const Showtime = require('../models/Showtime'); // <--- 1. IMPORT SHOWTIME MODEL
 const Seat = require('../models/Seat'); // Import Seat model
 const sendEmail = require('../utils/emailService');
+const Notification = require('../models/Notification'); // <--- Ensure this is imported
 
 // @desc    Create Booking AND Process Payment together
 // @route   POST /api/payments
@@ -46,7 +47,7 @@ exports.processPayment = async (req, res) => {
             console.log("3. New Booking Created:", bookingId);
 
             // B. CRITICAL: Update the Showtime to mark seats as "Booked"
-            // This prevents other people from booking the same seats!
+             // This prevents other people from booking the same seats!
             await Showtime.findByIdAndUpdate(showtimeId, {
                 $push: { bookedSeats: { $each: seats } } 
             });
@@ -67,6 +68,33 @@ exports.processPayment = async (req, res) => {
 
         const createdPayment = await payment.save();
         console.log("6. Payment Saved:", createdPayment._id);
+
+        // --- 🔔 MEMBER 8 INTEGRATION: SEND NOTIFICATION ---
+        try {
+            // 1. Create Notification in Database
+            const notifMessage = `Payment Successful! Booking Confirmed. (Payment ID: ${createdPayment._id})`;
+            const notification = await Notification.create({
+                userId: req.user._id,
+                message: notifMessage
+            });
+
+            // 2. Send Real-Time Alert via Socket.IO
+            const io = req.app.get('io');
+            const onlineUsers = req.app.get('onlineUsers');
+            const strUserId = String(req.user._id); // Force string matching
+
+            if (onlineUsers && onlineUsers.has(strUserId)) {
+                const socketId = onlineUsers.get(strUserId);
+                io.to(socketId).emit('receive_notification', notification);
+                console.log(`🔔 Notification SENT to User ${strUserId}`);
+            } else {
+                console.log(`⚠️ Notification saved, but User ${strUserId} is offline.`);
+            }
+        } catch (notifError) {
+            console.error("Notification Error (Non-blocking):", notifError.message);
+        }
+        // --- 🔔 END INTEGRATION ---
+
 
         // --- SCENARIO C: Send Confirmation Email ---
         const fullBooking = await Booking.findById(bookingId)
