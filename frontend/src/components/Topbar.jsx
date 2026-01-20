@@ -191,13 +191,15 @@ const Topbar = () => {
         <MdInfo /> About Us
       </NavLink>
       {isAuthenticated && (
-        <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
-          <MdConfirmationNumber /> My Bookings
-        </NavLink>
+        <>
+          <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
+            <MdConfirmationNumber /> My Bookings
+          </NavLink>
+          <NavLink to="/my-payments" onClick={() => setMobileOpen(false)}>
+            <MdPayments /> My Payments
+          </NavLink>
+        </>
       )}
-      <NavLink to="/my-payments" onClick={() => setMobileOpen(false)}>
-        <MdPayments /> My Payments
-      </NavLink>
     </>
   );
 
