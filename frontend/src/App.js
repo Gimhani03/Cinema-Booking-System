@@ -33,6 +33,8 @@ import PaymentPage from './pages/PaymentPage';
 import AdminPayments from './pages/admin/AdminPayments';
 import PaymentHistory from './pages/PaymentHistory';
 import Notifications from "./pages/customers/Notifications";
+import EmailVerification from "./pages/EmailVerification";
+import ResendVerification from "./pages/ResendVerification";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -147,6 +149,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/verify-email/:token" element={<EmailVerification />} />
+          <Route path="/resend-verification" element={<ResendVerification />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/confirm-password" element={<ConfirmPassword />} />
