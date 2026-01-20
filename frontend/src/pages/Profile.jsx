@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 import API from '../services/api';
 import './Profile.css';
 
@@ -22,6 +23,9 @@ const Profile = () => {
     confirmPassword: ''
   });
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -199,35 +203,48 @@ const Profile = () => {
 
           {showPasswordForm && (
             <form onSubmit={handlePasswordChange} className="password-form">
-              <div className="form-group">
+
+              <div className="form-group password-input-box">
                 <label>Current Password</label>
                 <input
-                  type="password"
+                  type={showCurrent ? "text" : "password"}
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                   required
+                  placeholder="Current Password"
                 />
+                <span className="password-eye-icon" onClick={() => setShowCurrent((prev) => !prev)}>
+                  {showCurrent ? <IoMdEyeOff /> : <IoMdEye />}
+                </span>
               </div>
 
-              <div className="form-group">
+              <div className="form-group password-input-box">
                 <label>New Password</label>
                 <input
-                  type="password"
+                  type={showNew ? "text" : "password"}
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                   required
                   minLength={8}
+                  placeholder="New Password"
                 />
+                <span className="password-eye-icon" onClick={() => setShowNew((prev) => !prev)}>
+                  {showNew ? <IoMdEyeOff /> : <IoMdEye />}
+                </span>
               </div>
 
-              <div className="form-group">
+              <div className="form-group password-input-box">
                 <label>Confirm New Password</label>
                 <input
-                  type="password"
+                  type={showConfirm ? "text" : "password"}
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                   required
+                  placeholder="Confirm New Password"
                 />
+                <span className="password-eye-icon" onClick={() => setShowConfirm((prev) => !prev)}>
+                  {showConfirm ? <IoMdEyeOff /> : <IoMdEye />}
+                </span>
               </div>
 
               <div className="form-actions">
