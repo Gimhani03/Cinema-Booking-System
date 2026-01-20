@@ -20,11 +20,20 @@ const getMyNotifications = async (req, res) => {
  */
 const markAsRead = async (req, res) => {
   try {
-    const notification = await Notification.findByIdAndUpdate(
-      req.params.id,
-      { isRead: true },
-      { new: true }
-    );
+    // Find notification and check ownership
+    const notification = await Notification.findById(req.params.id);
+    
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+    
+    // Check if notification belongs to the logged-in user
+    if (notification.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to modify this notification' });
+    }
+    
+    notification.isRead = true;
+    await notification.save();
 
     res.json(notification);
   } catch (error) {
@@ -67,11 +76,18 @@ const createNotification = async (req, res) => {
  */
 const deleteNotification = async (req, res) => {
   try {
-    const notification = await Notification.findByIdAndDelete(req.params.id);
+    const notification = await Notification.findById(req.params.id);
 
     if (!notification) {
       return res.status(404).json({ message: 'Notification not found' });
     }
+    
+    // Check if notification belongs to the logged-in user
+    if (notification.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to delete this notification' });
+    }
+    
+    await Notification.findByIdAndDelete(req.params.id);
 
     res.json({ message: 'Notification removed' });
   } catch (error) {
