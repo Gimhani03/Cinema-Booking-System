@@ -117,17 +117,192 @@ exports.processPayment = async (req, res) => {
             }
 
             const message = `
-                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #fbbf24;">Payment Confirmation</h2>
-                    <p>Hi <strong>${req.user.name}</strong>,</p>
-                    <p>Your booking for <strong>${movieTitle}</strong> is confirmed!</p>
-                    <div style="background: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                        <p><strong>Seats:</strong> ${seatDisplay}</p>
-                        <p><strong>Amount:</strong> Rs. ${amount.toLocaleString()}</p>
-                        <p><strong>Ref:</strong> ${createdPayment._id}</p>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <style>
+                    body {
+                      margin: 0;
+                      padding: 0;
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      background-color: #141436;
+                    }
+                    .email-container {
+                      max-width: 600px;
+                      margin: 40px auto;
+                      background: linear-gradient(135deg, #1a1a3e 0%, #2d2d5f 100%);
+                      border-radius: 20px;
+                      overflow: hidden;
+                      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+                      border: 1px solid rgba(255, 255, 255, 0.1);
+                    }
+                    .email-header {
+                      background: linear-gradient(135deg, #141436 0%, #1a1a3e 100%);
+                      padding: 40px 30px;
+                      text-align: center;
+                      border-bottom: 2px solid rgba(255, 61, 0, 0.3);
+                    }
+                    .logo {
+                      font-size: 32px;
+                      font-weight: 800;
+                      color: #ffffff;
+                      margin: 0;
+                      background: linear-gradient(135deg, #fff 0%, #ff3d00 100%);
+                      -webkit-background-clip: text;
+                      -webkit-text-fill-color: transparent;
+                      background-clip: text;
+                    }
+                    .email-body {
+                      padding: 50px 40px;
+                      color: #ffffff;
+                    }
+                    .greeting {
+                      font-size: 24px;
+                      font-weight: 600;
+                      margin-bottom: 20px;
+                      color: #ffffff;
+                    }
+                    .message {
+                      font-size: 16px;
+                      line-height: 1.6;
+                      color: #cccccc;
+                      margin-bottom: 30px;
+                    }
+                    .success-badge {
+                      display: inline-block;
+                      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+                      color: #ffffff;
+                      padding: 12px 30px;
+                      border-radius: 25px;
+                      font-size: 16px;
+                      font-weight: 700;
+                      margin-bottom: 30px;
+                    }
+                    .booking-details {
+                      background: rgba(255, 61, 0, 0.1);
+                      border: 2px solid rgba(255, 61, 0, 0.5);
+                      border-radius: 15px;
+                      padding: 30px;
+                      margin: 30px 0;
+                    }
+                    .detail-row {
+                      padding: 18px 0;
+                      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    }
+                    .detail-row:last-child {
+                      border-bottom: none;
+                    }
+                    .detail-label {
+                      font-size: 13px;
+                      color: #cccccc;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                      display: block;
+                      margin-bottom: 8px;
+                    }
+                    .detail-value {
+                      font-size: 18px;
+                      color: #ffffff;
+                      font-weight: 700;
+                      display: block;
+                    }
+                    .amount-highlight {
+                      color: #ff3d00;
+                      font-size: 18px;
+                    }
+                    .movie-title {
+                      font-size: 22px;
+                      color: #ff3d00;
+                      font-weight: 700;
+                      margin-bottom: 20px;
+                      text-align: center;
+                    }
+                    .enjoy-message {
+                      background: rgba(255, 255, 255, 0.05);
+                      border-left: 4px solid #ff3d00;
+                      padding: 20px;
+                      border-radius: 8px;
+                      margin-top: 30px;
+                      text-align: center;
+                    }
+                    .enjoy-text {
+                      font-size: 18px;
+                      color: #ffffff;
+                      font-weight: 600;
+                    }
+                    .email-footer {
+                      background: linear-gradient(135deg, #0f0f2e 0%, #141436 100%);
+                      padding: 30px;
+                      text-align: center;
+                      border-top: 1px solid rgba(255, 255, 255, 0.1);
+                    }
+                    .footer-text {
+                      font-size: 14px;
+                      color: #888888;
+                      margin: 5px 0;
+                    }
+                    .footer-brand {
+                      font-size: 18px;
+                      font-weight: 700;
+                      color: #ff3d00;
+                      margin-top: 15px;
+                    }
+                  </style>
+                </head>
+                <body>
+                  <div class="email-container">
+                    <div class="email-header">
+                      <h1 class="logo">🎬 Cinema Booking</h1>
                     </div>
-                    <p>Enjoy the movie!<br/>Cinema Booking Team</p>
-                </div>
+                    
+                    <div class="email-body">
+                      <div style="text-align: center;">
+                        <div class="success-badge">✓ Payment Successful</div>
+                      </div>
+                      
+                      <h2 class="greeting">Hi ${req.user.name}!</h2>
+                      
+                      <p class="message">
+                        Your booking has been confirmed and payment processed successfully. Get ready for an amazing movie experience!
+                      </p>
+                      
+                      <div class="movie-title">🎥 ${movieTitle}</div>
+                      
+                      <div class="booking-details">
+                        <div class="detail-row">
+                          <div class="detail-label">Seats</div>
+                          <div class="detail-value">${seatDisplay}</div>
+                        </div>
+                        <div class="detail-row">
+                          <div class="detail-label">Amount Paid</div>
+                          <div class="detail-value amount-highlight">Rs. ${amount.toLocaleString()}</div>
+                        </div>
+                        <div class="detail-row">
+                          <div class="detail-label">Payment Reference</div>
+                          <div class="detail-value" style="font-size: 14px; word-break: break-all;">${createdPayment._id}</div>
+                        </div>
+                      </div>
+                      
+                      <div class="enjoy-message">
+                        <div class="enjoy-text">🍿 Enjoy the movie!</div>
+                      </div>
+                      
+                      <p class="message" style="margin-top: 30px; font-size: 14px;">
+                        Please show this confirmation email or your booking reference at the cinema counter to collect your tickets.
+                      </p>
+                    </div>
+                    
+                    <div class="email-footer">
+                      <p class="footer-text">This is an automated message, please do not reply.</p>
+                      <p class="footer-text">© 2026 Cinema Booking System | All Rights Reserved</p>
+                      <div class="footer-brand">Cinema Booking</div>
+                    </div>
+                  </div>
+                </body>
+                </html>
             `;
 
             try {
