@@ -3,9 +3,11 @@ const mongoose = require('mongoose');
 const app = require('../../app');
 const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
-
+const sendEmail = require("../../utils/emailService");
 // Mock the database connection
 jest.mock('../../models/User');
+
+jest.mock("../../utils/emailService");
 
 describe('Auth API - Integration Tests', () => {
   beforeEach(() => {
@@ -15,13 +17,16 @@ describe('Auth API - Integration Tests', () => {
   describe('POST /api/auth/register', () => {
     it('should register a new user and return token', async () => {
       User.findOne.mockResolvedValue(null);
-      User.create.mockResolvedValue({
+      const mockUser = {
         _id: '123',
         name: 'Test User',
         email: 'test@example.com',
         role: 'customer',
-      });
-
+        createEmailVerificationToken: jest.fn().mockReturnValue('mock-token'),
+        save: jest.fn().mockResolvedValue(true),
+      };
+      User.create.mockResolvedValue(mockUser);
+      sendEmail.mockResolvedValue(true);
       const response = await request(app)
         .post('/api/auth/register')
         .send({
@@ -32,13 +37,13 @@ describe('Auth API - Integration Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('success', true);
-      expect(response.body).toHaveProperty('token');
-      expect(response.body.user).toHaveProperty('email', 'test@example.com');
+      expect(response.body).toHaveProperty('message', 'Verification email sent! Please check your email to verify your account.');
     });
 
     it('should return 400 if email already exists', async () => {
       User.findOne.mockResolvedValue({
         email: 'existing@example.com',
+        isEmailVerified: true,
       });
 
       const response = await request(app)
@@ -55,12 +60,83 @@ describe('Auth API - Integration Tests', () => {
   });
 
   describe('POST /api/auth/login', () => {
+        it('should not allow login before email verification', async () => {
+          const mockUser = {
+            _id: '123',
+            name: 'Test User',
+            email: 'test@example.com',
+            role: 'customer',
+            isEmailVerified: false,
+            comparePassword: jest.fn().mockResolvedValue(true),
+          };
+
+          User.findOne.mockResolvedValue(mockUser);
+
+          const response = await request(app)
+            .post('/api/auth/login')
+            .send({
+              email: 'test@example.com',
+              password: 'password123',
+            });
+
+          expect(response.status).toBe(401);
+          expect(response.body).toHaveProperty('message', 'Please verify your email before logging in. Check your inbox for the verification link.');
+        });
+
+        it('should allow login after email verification', async () => {
+          // Simulate user registration
+          User.findOne.mockResolvedValue(null);
+          const mockUser = {
+            _id: '123',
+            name: 'Test User',
+            email: 'test@example.com',
+            role: 'customer',
+            isEmailVerified: false,
+            createEmailVerificationToken: jest.fn().mockReturnValue('mock-token'),
+            save: jest.fn().mockResolvedValue(true),
+          };
+          User.create.mockResolvedValue(mockUser);
+          sendEmail.mockResolvedValue(true);
+          await request(app)
+            .post('/api/auth/register')
+            .send({
+              name: 'Test User',
+              email: 'test@example.com',
+              password: 'password123',
+            });
+
+          // Simulate email verification
+          // Setup verified user with required fields and comparePassword
+          const verifiedUser = {
+            _id: '123',
+            name: 'Test User',
+            email: 'test@example.com',
+            role: 'customer',
+            isEmailVerified: true,
+            comparePassword: jest.fn().mockResolvedValue(true),
+          };
+          User.findOne.mockResolvedValue(verifiedUser);
+
+          // Attempt login
+          const response = await request(app)
+            .post('/api/auth/login')
+            .send({
+              email: 'test@example.com',
+              password: 'password123',
+            });
+
+          expect(response.status).toBe(200);
+          expect(response.body).toHaveProperty('success', true);
+          expect(response.body).toHaveProperty('token');
+          expect(response.body.user).toHaveProperty('email', 'test@example.com');
+        });
     it('should login user with valid credentials', async () => {
       const mockUser = {
         _id: '123',
         name: 'Test User',
         email: 'test@example.com',
         role: 'customer',
+        isEmailVerified: true,
         comparePassword: jest.fn().mockResolvedValue(true),
       };
 
@@ -98,7 +174,7 @@ describe('Auth API - Integration Tests', () => {
         _id: '123',
         email: 'test@example.com',
         comparePassword: jest.fn().mockResolvedValue(false),
-      };
+        isEmailVerified: true,      };
 
       User.findOne.mockResolvedValue(mockUser);
 
@@ -231,13 +307,16 @@ describe('Auth API - Integration Tests', () => {
     it('should complete full registration and login flow', async () => {
       // Step 1: Register
       User.findOne.mockResolvedValue(null);
-      User.create.mockResolvedValue({
-        _id: '123',
-        name: 'Test User',
-        email: 'test@example.com',
-        role: 'customer',
-      });
-
+      const mockRegistrationUser = {
+        _id: "123",
+        name: "Test User",
+        email: "test@example.com",
+        role: "customer",
+        createEmailVerificationToken: jest.fn().mockReturnValue("mock-token"),
+        save: jest.fn().mockResolvedValue(true),
+      };
+      User.create.mockResolvedValue(mockRegistrationUser);
+      sendEmail.mockResolvedValue(true);
       const registerResponse = await request(app)
         .post('/api/auth/register')
         .send({
@@ -247,15 +326,13 @@ describe('Auth API - Integration Tests', () => {
         });
 
       expect(registerResponse.status).toBe(201);
-      const registrationToken = registerResponse.body.token;
-      expect(registrationToken).toBeTruthy();
-
+      expect(registerResponse.body.success).toBe(true);
       // Step 2: Login
       const mockUser = {
         _id: '123',
         name: 'Test User',
         email: 'test@example.com',
-        role: 'customer',
+        isEmailVerified: true,        role: 'customer',
         comparePassword: jest.fn().mockResolvedValue(true),
       };
 
