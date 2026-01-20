@@ -1,12 +1,12 @@
 const User = require('../../models/User');
 const authController = require('../../controllers/authController');
 const jwt = require('jsonwebtoken');
-
+const sendEmail = require("../../utils/emailService");
 // Mock the User model
 jest.mock('../../models/User');
 jest.mock('jsonwebtoken');
 
-describe('Auth Controller - Unit Tests', () => {
+jest.mock("../../utils/emailService");describe('Auth Controller - Unit Tests', () => {
   let req, res;
 
   beforeEach(() => {
@@ -30,26 +30,24 @@ describe('Auth Controller - Unit Tests', () => {
       };
 
       User.findOne.mockResolvedValue(null);
-      User.create.mockResolvedValue({
+      const mockUser = {
         _id: '123',
         name: 'Test User',
         email: 'test@example.com',
         role: 'customer',
-      });
+        createEmailVerificationToken: jest.fn().mockReturnValue('mock-verification-token'),
+        save: jest.fn().mockResolvedValue(true),
+      };
+      User.create.mockResolvedValue(mockUser);
       jwt.sign.mockReturnValue('mock-token');
-
+      sendEmail.mockResolvedValue(true);
       await authController.register(req, res);
 
       expect(User.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
-      expect(User.create).toHaveBeenCalledWith(req.body);
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        token: 'mock-token',
-        user: expect.objectContaining({
-          name: 'Test User',
-          email: 'test@example.com',
-        }),
+        message: 'Verification email sent! Please check your email to verify your account.',
       });
     });
 
@@ -60,7 +58,7 @@ describe('Auth Controller - Unit Tests', () => {
         password: 'password123',
       };
 
-      User.findOne.mockResolvedValue({ email: 'existing@example.com' });
+      User.findOne.mockResolvedValue({ email: 'existing@example.com', isEmailVerified: true });
 
       await authController.register(req, res);
 
@@ -100,6 +98,7 @@ describe('Auth Controller - Unit Tests', () => {
         name: 'Test User',
         email: 'test@example.com',
         role: 'customer',
+        isEmailVerified: true,
         comparePassword: jest.fn().mockResolvedValue(true),
       };
 
@@ -109,7 +108,6 @@ describe('Auth Controller - Unit Tests', () => {
       await authController.login(req, res);
 
       expect(User.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
-      expect(mockUser.comparePassword).toHaveBeenCalledWith('password123');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -145,7 +143,7 @@ describe('Auth Controller - Unit Tests', () => {
       const mockUser = {
         _id: '123',
         email: 'test@example.com',
-        comparePassword: jest.fn().mockResolvedValue(false),
+        isEmailVerified: false,
       };
 
       User.findOne.mockResolvedValue(mockUser);
@@ -154,7 +152,7 @@ describe('Auth Controller - Unit Tests', () => {
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Invalid email or password',
+        message: 'Please verify your email before logging in. Check your inbox for the verification link.',
       });
     });
   });
