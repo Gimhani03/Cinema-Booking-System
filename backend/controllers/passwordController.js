@@ -13,7 +13,18 @@ exports.sendOTP = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await OTP.create({ email, otp });
+    // Delete any existing OTPs for this email first
+    await OTP.deleteMany({ email });
+
+    // Create new OTP
+    const otpRecord = await OTP.create({ email, otp });
+    
+    // Verify OTP was saved
+    if (!otpRecord) {
+      throw new Error('Failed to save OTP to database');
+    }
+    
+    console.log('OTP saved successfully:', { email, otpId: otpRecord._id });
 
     const htmlTemplate = `
       <!DOCTYPE html>
@@ -188,7 +199,11 @@ exports.sendOTP = async (req, res) => {
       message: 'OTP sent to your email',
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in sendOTP:', error);
+    res.status(500).json({ 
+      message: error.message,
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
@@ -196,16 +211,25 @@ exports.verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
+    console.log('Verifying OTP for email:', email);
+    
     const otpRecord = await OTP.findOne({ email, otp });
+    
     if (!otpRecord) {
+      // Debug: Check if OTP exists for this email
+      const allOtpsForEmail = await OTP.find({ email });
+      console.log('Available OTPs for email:', allOtpsForEmail);
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
+
+    console.log('OTP verified successfully for:', email);
 
     res.status(200).json({
       success: true,
       message: 'OTP verified successfully',
     });
   } catch (error) {
+    console.error('Error in verifyOTP:', error);
     res.status(500).json({ message: error.message });
   }
 };
