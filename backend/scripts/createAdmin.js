@@ -21,6 +21,7 @@ const createAdmin = async () => {
       email: 'admin@cinema.com',
       password: 'admin123', 
       role: 'admin',
+      isEmailVerified: true, // Admin is auto-verified
     });
 
     console.log('Admin user created successfully!');
