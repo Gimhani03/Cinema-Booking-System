@@ -30,11 +30,11 @@ beforeAll(async () => {
   const user = await User.create({
     name: "Notify Test User",
     email: "notify@test.com",
-    password: "password123"
+    password: "password123",
+    isEmailVerified: true
   });
 
   userId = user._id;
-
   // Login to get JWT token
   const res = await request(app)
     .post("/api/auth/login")
