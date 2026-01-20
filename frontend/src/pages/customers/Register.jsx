@@ -26,10 +26,11 @@ const Register = () => {
     setIsLoading(true);
     try {
     const { data } = await API.post('/auth/register', { name, email, password });
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('role', data.user.role);
-    alert("Registration successful! Please login.");
+    
+    // Show success message about email verification
+    alert(data.message || "Registration successful! Please check your email to verify your account.");
+    
+    // Redirect to login page
     navigate("/login");
   } catch (error) {
     alert(error.response?.data?.message || 'Registration failed');
