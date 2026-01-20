@@ -12,6 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault(); 
@@ -22,6 +23,7 @@ const Login = () => {
     }
 
     setIsLoading(true);
+    setEmailNotVerified(false);
     try {
     const { data } = await API.post('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
@@ -35,7 +37,14 @@ const Login = () => {
       navigate("/home");
     }
   } catch (error) {
-    alert(error.response?.data?.message || 'Login failed');
+    const errorMessage = error.response?.data?.message || 'Login failed';
+    
+    // Check if error is about unverified email
+    if (errorMessage.toLowerCase().includes('verify your email')) {
+      setEmailNotVerified(true);
+    }
+    
+    alert(errorMessage);
   } finally {
     setIsLoading(false);
   }
@@ -83,6 +92,32 @@ const Login = () => {
           <button type="submit" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Login"}
           </button>
+
+          {emailNotVerified && (
+            <div className="email-not-verified" style={{
+              marginTop: '15px',
+              padding: '12px',
+              backgroundColor: '#fff3cd',
+              border: '1px solid #ffc107',
+              borderRadius: '5px',
+              textAlign: 'center'
+            }}>
+              <p style={{ margin: '0 0 8px 0', color: '#856404', fontSize: '14px' }}>
+                Your email is not verified yet.
+              </p>
+              <Link 
+                to="/resend-verification" 
+                style={{ 
+                  color: '#0056b3', 
+                  textDecoration: 'underline',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                Click here to resend verification email
+              </Link>
+            </div>
+          )}
 
           <div className="register">
             <p>
