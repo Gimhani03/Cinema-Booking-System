@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { getHalls, createHall, deleteHall, updateHall } from "../../services/hallService"; 
-import Topbar from "../../components/Topbar"; 
-import Footer from "../../components/Footer"; 
+
 import "./HallManager.css"; 
 
 const HallManager = () => {
@@ -139,8 +138,6 @@ const HallManager = () => {
 
   return (
     <>
-      <Topbar /> 
-      
       <div className="hallmanager-page">
         <div className="hallmanager-header">
           <h1 className="hallmanager-title">Cinema Hall Manager</h1>
@@ -262,7 +259,7 @@ const HallManager = () => {
           )}
         </div>
       </div>
-      <Footer /> 
+      {/* Footer is handled by layout */}
     </>
   );
 };
