@@ -176,10 +176,40 @@
     transition: all 0.2s ease;
 }
 
+/* Orange theme for locked (past) showtimes */
+.scope-time-btn.locked,
+.scope-time-btn:disabled {
+  background: rgba(255, 61, 0, 0.13) !important; /* Light orange background */
+ 
+  color: #fff !important; /* Keep text white */
+  opacity: 1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.scope-time-btn.locked .time-text,
+.scope-time-btn:disabled .time-text {
+  color: #fff !important;
+}
+
+.scope-time-btn.locked .price-text,
+.scope-time-btn:disabled .price-text {
+  color: #fff !important;
+}
+
 .scope-time-btn:hover {
     border-color: #00aeef; /* Hover Blue */
     background-color: rgba(0, 174, 239, 0.1); /* Slight tint */
     transform: translateY(-2px);
+}
+
+/* Remove hover effect for disabled/locked buttons */
+.scope-time-btn.locked:hover,
+.scope-time-btn:disabled:hover {
+  border:1px solid #444 ;
+  background: rgba(255, 61, 0, 0.13) !important;
+  transform: none !important;
+  cursor: not-allowed;
 }
 
 .scope-time-btn .time-text {
