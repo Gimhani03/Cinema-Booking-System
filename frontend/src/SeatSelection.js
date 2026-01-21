@@ -18,7 +18,7 @@ const SeatSelection = () => {
   useEffect(() => {
     const fetchSeats = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/seats/${showtimeId}`);
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/seats/${showtimeId}`);
         // DEBUG: Look in your browser console (F12) to see exactly what "status" the DB sends
         console.log("Seats Data from API:", res.data); 
         setSeats(res.data);

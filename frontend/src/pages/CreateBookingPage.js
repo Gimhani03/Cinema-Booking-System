@@ -22,7 +22,7 @@ const CreateBookingPage = () => {
 
         try {
             console.log("1. Fetching Showtime for ID:", showtimeId);
-            const showtimeRes = await axios.get(`http://localhost:5001/api/showtimes/${showtimeId}`);
+            const showtimeRes = await axios.get(`${process.env.REACT_APP_API_URL}/showtimes/${showtimeId}`);
             const data = showtimeRes.data;
             
             // DETECT MOVIE ID
@@ -44,7 +44,7 @@ const CreateBookingPage = () => {
 
             // FETCH MOVIE DETAILS
             if (movieId) {
-                const movieRes = await axios.get(`http://localhost:5001/api/movies/${movieId}`);
+                const movieRes = await axios.get(`${process.env.REACT_APP_API_URL}/movies/${movieId}`);
                 const mData = movieRes.data;
                 
                 movieTitle = mData.title || (mData.movie && mData.movie.title) || (mData.data && mData.data.title);

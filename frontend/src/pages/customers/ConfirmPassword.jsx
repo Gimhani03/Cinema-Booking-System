@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import './ConfirmPassword.css'
-import { FaLock, FaArrowLeft } from 'react-icons/fa'
+import { FaArrowLeft } from 'react-icons/fa'
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io'
 import { useNavigate } from 'react-router-dom';
 import API from '../../services/api';

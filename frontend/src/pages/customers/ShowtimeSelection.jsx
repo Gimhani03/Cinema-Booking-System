@@ -32,7 +32,7 @@ const ShowtimeSelection = () => {
         const hallData = await getHalls();
         setHalls(hallData.data || []);
 
-  
+        // 4. Set Default Date (prefer today if available, else first future date)
         if (allShowtimes.length > 0) {
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -61,6 +61,7 @@ const ShowtimeSelection = () => {
 
   if (loading) return <div className="loading-screen">Loading showtimes...</div>;
   if (!movie) return <div className="error-screen">Movie not found</div>;
+
 
   // Only show today and future dates
   const today = new Date();
@@ -179,7 +180,7 @@ const ShowtimeSelection = () => {
                     {/* RIGHT COL: Buttons */}
                     <div className="hall-right-col">
                         <div className="time-grid">
-                           {showtimesByHall[hallName].map((st) => {
+                          {showtimesByHall[hallName].map((st) => {
                             // Combine date and startTime to get the full showtime datetime
                             const showDate = new Date(st.date);
                             // Assume st.startTime is in format 'HH:mm AM/PM' (e.g., '10:15 AM')

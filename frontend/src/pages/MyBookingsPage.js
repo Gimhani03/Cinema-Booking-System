@@ -23,7 +23,7 @@ console.log('Using userId:', userId);
             return;
       }
       try {
-        const res = await axios.get(`http://localhost:5001/api/bookings/user/${userId}`);
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/bookings/user/${userId}`);
         
         // Handle array vs object response
         const data = Array.isArray(res.data) ? res.data : res.data.bookings || [];
@@ -45,7 +45,7 @@ console.log('Using userId:', userId);
     if(!window.confirm("Are you sure you want to cancel this booking?")) return;
     
     try {
-        const response = await axios.delete(`http://localhost:5001/api/bookings/${id}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/bookings/${id}`);
         
         // Update the booking status to "Cancelled" instead of removing it
         setHistory(history.map(b => 
@@ -101,7 +101,7 @@ console.log('Using userId:', userId);
               onClick={async () => {
                   if(window.confirm("Delete ALL history? This cannot be undone.")) {
                       try {
-                          await axios.post('http://localhost:5001/api/bookings/clear-history', { 
+                          await axios.post(`${process.env.REACT_APP_API_URL}/bookings/clear-history`, { 
                               userId: userId
                           });
                           window.location.reload(); 

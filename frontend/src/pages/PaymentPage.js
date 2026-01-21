@@ -43,7 +43,7 @@ const PaymentPage = () => {
                 console.log("Detected Seat Names (J1). Fetching real IDs...");
                 try {
                     // Fetch all seats for this showtime to find the matching IDs
-                    const res = await axios.get(`http://localhost:5001/api/seats/${showtimeId}`);
+                    const res = await axios.get(`${process.env.REACT_APP_API_URL}/seats/${showtimeId}`);
                     const allSeats = res.data;
 
                     // Match "J1" to the real seat object from DB
@@ -52,7 +52,7 @@ const PaymentPage = () => {
                         const match = seatName.match(/([A-Z]+)(\d+)/); 
                         if (!match) return null;
                         
-                        const [_, row, num] = match;
+                        const [, row, num] = match;
                         return allSeats.find(s => s.row === row && String(s.number) === num);
                     }).filter(Boolean); // Remove any nulls
 

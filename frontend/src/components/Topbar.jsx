@@ -50,7 +50,7 @@ const Topbar = () => {
       if (!token) return;
 
       try {
-        const res = await axios.get("http://localhost:5001/api/notifications/unread-count", {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/notifications/unread-count`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUnreadCount(res.data.count);
@@ -76,7 +76,7 @@ const Topbar = () => {
     // Stop if no valid user ID
     if (!token || !userId) return; 
 
-    const socket = io("http://localhost:5001");
+    const socket = io(process.env.REACT_APP_API_URL.replace(/\/api$/, ''));
 
     socket.on("connect", () => {
         socket.emit("register", userId);

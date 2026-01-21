@@ -197,10 +197,11 @@
   color: #fff !important;
 }
 
+
 .scope-time-btn:hover {
-    border-color: #00aeef; /* Hover Blue */
-    background-color: rgba(0, 174, 239, 0.1); /* Slight tint */
-    transform: translateY(-2px);
+  border-color: #00aeef; /* Hover Blue */
+  background-color: rgba(0, 174, 239, 0.1); /* Slight tint */
+  transform: translateY(-2px);
 }
 
 /* Remove hover effect for disabled/locked buttons */

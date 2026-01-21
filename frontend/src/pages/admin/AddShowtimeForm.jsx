@@ -26,7 +26,7 @@ const AddShowtimeForm = () => {
         const data = await getMovies();
         setMovies(data);
 
-        const hallRes = await axios.get("http://localhost:5001/api/halls");
+        const hallRes = await axios.get(`${process.env.REACT_APP_API_URL}/halls`);
         setHalls(hallRes.data.data || []);
 
       } catch (err) {

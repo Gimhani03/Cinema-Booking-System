@@ -13,7 +13,7 @@ const PaymentHistory = () => {
     const fetchMyPayments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5001/api/payments/my-payments?t=${Date.now()}`, {
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/payments/my-payments?t=${Date.now()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const sorted = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -35,7 +35,7 @@ const PaymentHistory = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.delete('http://localhost:5001/api/payments/my-payments', {
+            await axios.delete(`${process.env.REACT_APP_API_URL}/payments/my-payments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPayments([]);

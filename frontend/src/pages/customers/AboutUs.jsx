@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFilm, FaUsers, FaTicketAlt, FaStar, FaMapMarkerAlt, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaFilm, FaUsers, FaTicketAlt, FaMapMarkerAlt, FaEnvelope, FaPhone } from 'react-icons/fa';
 import './AboutUs.css';
 
 const AboutUs = () => {

@@ -27,7 +27,7 @@ const AdminPayments = () => {
             
             // Add timestamp to force fresh data
             // Added '/all' to match the backend route
-            const res = await axios.get(`http://localhost:5001/api/payments/all?t=${new Date().getTime()}`, {
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/payments/all?t=${new Date().getTime()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -69,7 +69,7 @@ const AdminPayments = () => {
         if(!window.confirm("ARE YOU SURE? This will delete ALL payment history forever!")) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.delete('http://localhost:5001/api/payments', {
+            await axios.delete(`${process.env.REACT_APP_API_URL}/payments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert("Database Cleared!");

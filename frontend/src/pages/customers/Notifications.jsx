@@ -36,7 +36,7 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5001/api/notifications/my", {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/notifications/my`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications(res.data);
@@ -55,7 +55,7 @@ const Notifications = () => {
   const markAsRead = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5001/api/notifications/${id}/read`, {}, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
@@ -68,7 +68,7 @@ const Notifications = () => {
   const deleteNotification = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5001/api/notifications/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/notifications/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications(prev => prev.filter(n => n._id !== id));

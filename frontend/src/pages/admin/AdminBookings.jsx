@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaSearch, FaDownload, FaEye, FaTimes, FaFilter, FaCheckCircle, FaTimesCircle, FaMoneyBillWave, FaCalendarDay } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FaSearch, FaDownload, FaEye, FaTimes, FaCheckCircle, FaTimesCircle, FaMoneyBillWave, FaCalendarDay } from 'react-icons/fa';
 import { MdRefresh, MdBarChart } from 'react-icons/md';
 import axios from 'axios';
 import './AdminBookings.css';
@@ -23,26 +23,16 @@ const AdminBookings = () => {
     todayBookings: 0
   });
 
-  useEffect(() => {
-    fetchAllBookings();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [searchTerm, filterStatus, filterDate, bookings]);
-
-  const fetchAllBookings = async () => {
+  const fetchAllBookings = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5001/api/bookings/all');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/bookings/all`);
       const bookingsData = Array.isArray(response.data) ? response.data : response.data.bookings || [];
-      
       // Debug log to check seat structure
       if (bookingsData.length > 0) {
         console.log('🔍 Sample booking data:', bookingsData[0]);
         console.log('🪑 Sample seat data:', bookingsData[0].seatIds);
       }
-      
       setBookings(bookingsData);
       calculateStats(bookingsData);
     } catch (error) {
@@ -51,7 +41,7 @@ const AdminBookings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const calculateStats = (data) => {
     const total = data.length;
@@ -60,18 +50,15 @@ const AdminBookings = () => {
     const totalRevenue = data
       .filter(b => b.status === 'Confirmed')
       .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-    
     const today = new Date().toDateString();
     const todayBookings = data.filter(b => 
       new Date(b.createdAt).toDateString() === today
     ).length;
-
     setStats({ total, confirmed, cancelled, totalRevenue, todayBookings });
   };
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...bookings];
-
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(booking => 
@@ -96,7 +83,15 @@ const AdminBookings = () => {
     }
 
     setFilteredBookings(filtered);
-  };
+  }, [bookings, searchTerm, filterStatus, filterDate]);
+
+  useEffect(() => {
+    fetchAllBookings();
+  }, [fetchAllBookings]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const handleViewDetails = (booking) => {
     console.log('📋 Viewing booking details:', booking);
@@ -109,7 +104,7 @@ const AdminBookings = () => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) return;
 
     try {
-      await axios.delete(`http://localhost:5001/api/bookings/${bookingId}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/bookings/${bookingId}`);
       alert('Booking cancelled successfully!');
       fetchAllBookings();
     } catch (error) {
