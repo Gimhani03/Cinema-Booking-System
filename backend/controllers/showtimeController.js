@@ -55,6 +55,14 @@ exports.updateShowtime = async (req, res) => {
     if (!showtime) {
       return res.status(404).json({ success: false, message: 'Showtime not found' });
     }
+    // If price was updated, update all related seats
+    if (typeof req.body.price !== 'undefined') {
+      const Seat = require('../models/Seat');
+      await Seat.updateMany(
+        { showtimeId: showtime._id },
+        { $set: { price: req.body.price } }
+      );
+    }
 
     res.status(200).json({ success: true, data: showtime });
   } catch (error) {
