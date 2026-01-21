@@ -84,7 +84,6 @@ const PaymentPage = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const PORT = 5001; 
 
             // --- PAYLOAD CREATION ---
             const payload = {
@@ -98,7 +97,7 @@ const PaymentPage = () => {
             console.log("Sending Payment Payload:", payload);
 
             // 1. Process Payment
-            const res = await axios.post(`http://localhost:${PORT}/api/payments`, payload, {
+            const res = await axios.post(`${process.env.REACT_APP_API_URL}/payments`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
