@@ -32,11 +32,23 @@ const ShowtimeSelection = () => {
         const hallData = await getHalls();
         setHalls(hallData.data || []);
 
-        // 4. Set Default Date
+  
         if (allShowtimes.length > 0) {
-            const dates = [...new Set(allShowtimes.map(st => new Date(st.date).toDateString()))];
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const dates = [...new Set(allShowtimes.map(st => new Date(st.date).toDateString()))]
+              .filter(dateStr => {
+                const dateObj = new Date(dateStr);
+                dateObj.setHours(0,0,0,0);
+                return dateObj >= today;
+              });
             dates.sort((a, b) => new Date(a) - new Date(b));
-            setSelectedDate(dates[0]);
+            const todayStr = today.toDateString();
+            if (dates.includes(todayStr)) {
+              setSelectedDate(todayStr);
+            } else if (dates.length > 0) {
+              setSelectedDate(dates[0]);
+            }
         }
       } catch (error) {
         console.error("Error loading data:", error);
@@ -50,7 +62,15 @@ const ShowtimeSelection = () => {
   if (loading) return <div className="loading-screen">Loading showtimes...</div>;
   if (!movie) return <div className="error-screen">Movie not found</div>;
 
-  const uniqueDates = [...new Set(showtimes.map(st => new Date(st.date).toDateString()))];
+  // Only show today and future dates
+  const today = new Date();
+  today.setHours(0,0,0,0); // Remove time part for accurate comparison
+  const uniqueDates = [...new Set(showtimes.map(st => new Date(st.date).toDateString()))]
+    .filter(dateStr => {
+      const dateObj = new Date(dateStr);
+      dateObj.setHours(0,0,0,0);
+      return dateObj >= today;
+    });
   uniqueDates.sort((a, b) => new Date(a) - new Date(b));
 
   const showtimesForDate = showtimes.filter(
@@ -159,16 +179,31 @@ const ShowtimeSelection = () => {
                     {/* RIGHT COL: Buttons */}
                     <div className="hall-right-col">
                         <div className="time-grid">
-                            {showtimesByHall[hallName].map((st) => (
-                                <button 
-                                    key={st._id} 
-                                    className="scope-time-btn"
-                                    onClick={() => handleTimeClick(st._id)}
-                                >
-                                    <span className="time-text">{st.startTime}</span>
-                                    <span className="price-text">Rs. {st.price}</span>
-                                </button>
-                            ))}
+                           {showtimesByHall[hallName].map((st) => {
+                            // Combine date and startTime to get the full showtime datetime
+                            const showDate = new Date(st.date);
+                            // Assume st.startTime is in format 'HH:mm AM/PM' (e.g., '10:15 AM')
+                            const [time, modifier] = st.startTime.split(' ');
+                            let [hours, minutes] = time.split(':');
+                            hours = parseInt(hours, 10);
+                            minutes = parseInt(minutes, 10);
+                            if (modifier === 'PM' && hours !== 12) hours += 12;
+                            if (modifier === 'AM' && hours === 12) hours = 0;
+                            showDate.setHours(hours, minutes, 0, 0);
+                            const now = new Date();
+                            const isPast = showDate < now;
+                            return (
+                              <button
+                                key={st._id}
+                                className={`scope-time-btn${isPast ? ' locked' : ''}`}
+                                onClick={() => handleTimeClick(st._id)}
+                                disabled={isPast}
+                              >
+                                <span className="time-text">{st.startTime}</span>
+                                <span className="price-text">Rs. {st.price}</span>
+                              </button>
+                            );
+                          })}
                         </div>
                     </div>
 
