@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Create verification URL pointing to frontend
-    const verificationURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${verificationToken}`;
+    const verificationURL = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
 
     // Send verification email
     const message = `
@@ -469,7 +469,7 @@ exports.resendVerificationEmail = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Create verification URL pointing to frontend
-    const verificationURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${verificationToken}`;
+    const verificationURL = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
 
     // Send verification email
     const message = `
