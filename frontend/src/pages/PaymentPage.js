@@ -104,7 +104,7 @@ const PaymentPage = () => {
 
             // --- 2. MARK SEATS AS BOOKED ---
             const seatIdsToBook = finalSeats.map(s => s._id); 
-            await axios.post(`http://localhost:${PORT}/api/seats/book-seats`, {
+            await axios.post(`${process.env.REACT_APP_API_URL}/seats/book-seats`, {
                 seatIds: seatIdsToBook
             });
             console.log("Seats successfully marked as booked.");
